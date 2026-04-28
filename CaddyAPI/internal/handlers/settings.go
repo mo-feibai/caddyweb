@@ -1,11 +1,7 @@
 package handlers
 
 import (
-	"fmt"
 	"log"
-	"os/exec"
-	"runtime"
-	"strings"
 
 	"github.com/caddyweb/caddyapi/internal/config"
 	"github.com/gin-gonic/gin"
@@ -53,6 +49,9 @@ func UpdateSettings(c *gin.Context) {
 	if language, ok := updates["language"].(string); ok {
 		cfg.Language = language
 	}
+	if reloadMode, ok := updates["reloadMode"].(string); ok {
+		cfg.ReloadMode = reloadMode
+	}
 	if caddySettings, ok := updates["caddy"].(map[string]interface{}); ok {
 		if unixSocket, ok := caddySettings["unixSocket"].(string); ok {
 			cfg.CaddySettings.UnixSocket = unixSocket
@@ -84,8 +83,8 @@ func ResetSettings(c *gin.Context) {
 
 // CheckCaddyInstallStatus 检测 Caddy 安装状态
 func CheckCaddyInstallStatus(c *gin.Context) {
-	installed, version := checkCaddyInstalled()
-	running, _ := checkCaddyRunning()
+	installed, version := caddyClient.IsInstalled()
+	running, _ := caddyClient.IsRunning()
 
 	Success(c, gin.H{
 		"installed":  installed,
@@ -96,49 +95,18 @@ func CheckCaddyInstallStatus(c *gin.Context) {
 	})
 }
 
-// checkCaddyInstalled 检查 Caddy 是否已安装
-func checkCaddyInstalled() (bool, string) {
-	version, err := getCaddyVersion()
-	if err != nil {
-		return false, ""
-	}
-	return true, version
-}
-
-// checkCaddyRunning 检查 Caddy 是否正在运行
-func checkCaddyRunning() (bool, string) {
-	client := NewCaddyClient()
-	if err := client.CheckConnection(); err != nil {
-		return false, ""
-	}
-	version, _ := client.GetVersion()
-	return true, version
-}
-
-// getCaddyVersion 获取 Caddy 版本号
-func getCaddyVersion() (string, error) {
-	cmd := exec.Command("caddy", "version")
-	output, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(output)), nil
-}
-
 // InstallCaddy 安装 Caddy
 func InstallCaddy(c *gin.Context) {
 	var req struct {
-		InstallType string `json:"installType"` // "auto" or "useExisting"
+		InstallType string `json:"installType"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		// 尝试自动安装
 		req.InstallType = "auto"
 	}
 
 	if req.InstallType == "useExisting" {
-		// 用户选择使用已安装的 Caddy
-		installed, version := checkCaddyInstalled()
+		installed, version := caddyClient.IsInstalled()
 		if !installed {
 			SuccessWithMessage(c, "Caddy is not installed. Please install Caddy first.", gin.H{
 				"success": false,
@@ -147,8 +115,7 @@ func InstallCaddy(c *gin.Context) {
 			return
 		}
 
-		// 启动 Caddy
-		if err := startCaddy(); err != nil {
+		if err := caddyClient.Start(); err != nil {
 			log.Printf("[ERROR] Failed to start Caddy: %v", err)
 			SuccessWithMessage(c, "Caddy is installed but failed to start. Please start it manually.", gin.H{
 				"success": false,
@@ -166,12 +133,10 @@ func InstallCaddy(c *gin.Context) {
 		return
 	}
 
-	// 自动安装 Caddy
-	success, message := performCaddyInstall()
+	success, message := caddyClient.Install()
 
 	if success {
-		// 安装成功后尝试启动
-		if err := startCaddy(); err != nil {
+		if err := caddyClient.Start(); err != nil {
 			log.Printf("[WARN] Caddy installed but failed to auto-start: %v", err)
 			message = "Caddy installed. Please start it manually."
 		}
@@ -182,56 +147,9 @@ func InstallCaddy(c *gin.Context) {
 	})
 }
 
-// performCaddyInstall 执行 Caddy 安装
-func performCaddyInstall() (bool, string) {
-	os := runtime.GOOS
-
-	var installCmd *exec.Cmd
-
-	switch os {
-	case "linux":
-		// 使用官方安装脚本
-		installCmd = exec.Command("bash", "-c", "curl -s https://getcaddy.com | bash")
-	case "darwin":
-		installCmd = exec.Command("brew", "install", "caddy")
-	default:
-		return false, fmt.Sprintf("Unsupported OS: %s", os)
-	}
-
-	output, err := installCmd.CombinedOutput()
-	if err != nil {
-		log.Printf("[ERROR] Caddy installation failed: %v, output: %s", err, string(output))
-		return false, fmt.Sprintf("Installation failed: %v", err)
-	}
-
-	version, _ := getCaddyVersion()
-	return true, fmt.Sprintf("Caddy installed successfully. Version: %s", version)
-}
-
-// startCaddy 启动 Caddy
-func startCaddy() error {
-	var cmd *exec.Cmd
-
-	os := runtime.GOOS
-	if os == "linux" {
-		// 尝试使用 systemctl 启动
-		cmd = exec.Command("systemctl", "start", "caddy")
-		if err := cmd.Run(); err != nil {
-			// 如果 systemctl 失败，尝试直接启动
-			cmd = exec.Command("caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile")
-			return cmd.Start()
-		}
-		return nil
-	}
-
-	// 直接启动
-	cmd = exec.Command("caddy", "run")
-	return cmd.Start()
-}
-
 // GetCaddyStatus 获取 Caddy 运行状态
 func GetCaddyStatus(c *gin.Context) {
-	running, version := checkCaddyRunning()
+	running, version := caddyClient.IsRunning()
 
 	if running {
 		SuccessWithMessage(c, "Caddy2 is running", gin.H{
@@ -249,7 +167,7 @@ func GetCaddyStatus(c *gin.Context) {
 
 // DetectCaddy 检测 Caddy 连接
 func DetectCaddy(c *gin.Context) {
-	running, version := checkCaddyRunning()
+	running, version := caddyClient.IsRunning()
 
 	if running {
 		SuccessWithMessage(c, "Caddy2 is running", gin.H{
@@ -271,7 +189,7 @@ type ServerInfo struct {
 
 // GetServers 获取服务器列表
 func GetServers(c *gin.Context) {
-	running, _ := checkCaddyRunning()
+	running, _ := caddyClient.IsRunning()
 
 	if !running {
 		SuccessWithMessage(c, "Caddy2 is not running", gin.H{
@@ -308,7 +226,7 @@ type InitCaddyRequest struct {
 
 // InitCaddy 初始化 Caddy 配置
 func InitCaddy(c *gin.Context) {
-	running, version := checkCaddyRunning()
+	running, version := caddyClient.IsRunning()
 
 	if !running {
 		SuccessWithMessage(c, "Caddy2 is not running", gin.H{
@@ -407,43 +325,4 @@ func ReloadCaddy(c *gin.Context) {
 
 	log.Printf("[INFO] Caddy config reloaded successfully")
 	SuccessWithMessage(c, "Caddy config reloaded", gin.H{"success": true})
-}
-
-// CaddyClient 简化的 Caddy 客户端
-type CaddyClient struct {
-	adminURL string
-}
-
-func NewCaddyClient() *CaddyClient {
-	return &CaddyClient{
-		adminURL: "http://localhost:2019",
-	}
-}
-
-func (c *CaddyClient) CheckConnection() error {
-	// 使用 systemctl 检查 Caddy 服务状态
-	cmd := exec.Command("systemctl", "is-active", "caddy")
-	err := cmd.Run()
-	if err == nil {
-		return nil // 服务正在运行
-	}
-
-	// 如果 systemctl 失败，尝试使用 ps 检查
-	cmd = exec.Command("bash", "-c", "pgrep -x caddy > /dev/null 2>&1")
-	err = cmd.Run()
-	if err == nil {
-		return nil // 进程存在
-	}
-
-	return fmt.Errorf("caddy is not running")
-}
-
-func (c *CaddyClient) GetVersion() (string, error) {
-	// 使用 caddy version 命令获取版本
-	cmd := exec.Command("caddy", "version")
-	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("failed to get caddy version: %w", err)
-	}
-	return strings.TrimSpace(string(output)), nil
 }

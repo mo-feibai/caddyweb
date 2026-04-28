@@ -49,15 +49,14 @@ func startCaddyStatusChecker() {
 
 // checkCaddyRealTime checks the real-time Caddy status
 func checkCaddyRealTime() CaddyStatus {
-	client := NewCaddyClient()
-	if err := client.CheckConnection(); err != nil {
+	running, version := caddyClient.IsRunning()
+	if !running {
 		return CaddyStatus{
 			Status:  "stopped",
 			Message: "Caddy2 is not running",
 		}
 	}
 
-	version, _ := client.GetVersion()
 	return CaddyStatus{
 		Status:  "running",
 		Message: "Caddy2 is running",
@@ -150,9 +149,9 @@ func CheckCaddyAndInstall(c *gin.Context) {
 
 // GetCaddyVersion gets Caddy version via local command
 func GetCaddyVersion(c *gin.Context) {
-	version, err := getCaddyVersion()
-	if err != nil {
-		log.Printf("[WARN] Failed to get Caddy version: %v", err)
+	installed, version := caddyClient.IsInstalled()
+	if !installed {
+		log.Printf("[WARN] Failed to get Caddy version: Caddy not installed")
 		Success(c, gin.H{
 			"installed": false,
 			"version":   "",

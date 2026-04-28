@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 
@@ -228,23 +230,87 @@ func (c *Client) LoadConfig() error {
 	return err
 }
 
-func (c *Client) GetVersion() (*Version, error) {
-	data, err := c.doRequest("GET", "/version", nil)
-	if err != nil {
-		return nil, err
+func (c *Client) CheckConnection() error {
+	// 使用 systemctl 检查 Caddy 服务状态
+	cmd := exec.Command("systemctl", "is-active", "caddy")
+	err := cmd.Run()
+	if err == nil {
+		return nil // 服务正在运行
 	}
 
-	var version Version
-	if err := json.Unmarshal(data, &version); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal version: %w", err)
+	// 如果 systemctl 失败，尝试使用 ps 检查
+	cmd = exec.Command("bash", "-c", "pgrep -x caddy > /dev/null 2>&1")
+	err = cmd.Run()
+	if err == nil {
+		return nil // 进程存在
 	}
 
-	return &version, nil
+	return fmt.Errorf("caddy is not running")
 }
 
-func (c *Client) CheckConnection() error {
-	_, err := c.GetVersion()
-	return err
+func (c *Client) IsInstalled() (bool, string) {
+	version, err := c.GetCaddyVersion()
+	if err != nil {
+		return false, ""
+	}
+	return true, version
+}
+
+func (c *Client) IsRunning() (bool, string) {
+	if err := c.CheckConnection(); err != nil {
+		return false, ""
+	}
+	version, _ := c.GetCaddyVersion()
+	return true, version
+}
+
+func (c *Client) GetCaddyVersion() (string, error) {
+	cmd := exec.Command("caddy", "version")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to get caddy version: %w", err)
+	}
+	return strings.TrimSpace(string(output)), nil
+}
+
+func (c *Client) Install() (bool, string) {
+	os := runtime.GOOS
+
+	var installCmd *exec.Cmd
+
+	switch os {
+	case "linux":
+		installCmd = exec.Command("bash", "-c", "curl -s https://getcaddy.com | bash")
+	case "darwin":
+		installCmd = exec.Command("brew", "install", "caddy")
+	default:
+		return false, fmt.Sprintf("Unsupported OS: %s", os)
+	}
+
+	output, err := installCmd.CombinedOutput()
+	if err != nil {
+		return false, fmt.Sprintf("Installation failed: %v, output: %s", err, string(output))
+	}
+
+	version, _ := c.GetCaddyVersion()
+	return true, fmt.Sprintf("Caddy installed successfully. Version: %s", version)
+}
+
+func (c *Client) Start() error {
+	var cmd *exec.Cmd
+
+	os := runtime.GOOS
+	if os == "linux" {
+		cmd = exec.Command("systemctl", "start", "caddy")
+		if err := cmd.Run(); err != nil {
+			cmd = exec.Command("caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile")
+			return cmd.Start()
+		}
+		return nil
+	}
+
+	cmd = exec.Command("caddy", "run")
+	return cmd.Start()
 }
 
 type LogEntry struct {

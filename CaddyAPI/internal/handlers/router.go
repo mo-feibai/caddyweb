@@ -47,7 +47,7 @@ func NewRouter() *gin.Engine {
 
 		// Caddy version
 		api.GET("/version", func(c *gin.Context) {
-			version, err := caddyClient.GetVersion()
+			version, err := caddyClient.GetCaddyVersion()
 			if err != nil {
 				log.Printf("[ERROR] Failed to get version: %v", err)
 				InternalServerError(c, "Failed to get version")
@@ -159,10 +159,11 @@ func NewRouter() *gin.Engine {
 		api.POST("/caddy/reload", ReloadCaddy)
 		api.GET("/caddy/check-install", CheckCaddyInstallStatus)
 		api.POST("/caddy/init", InitCaddy)
-		api.GET("/caddy/servers", GetServers)
 
 		// SSE endpoint for real-time updates
 		api.GET("/sse", SSEHandler)
+
+		api.GET("/caddy/servers", GetServers)
 
 		// Domain management
 		api.GET("/domains", ListDomains)
