@@ -1,0 +1,56 @@
+# Go
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Build artifacts
+caddyapi
+api
+
+# Vendor (if using vendoring)
+vendor/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Zed
+.zed/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files (containing secrets)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Config files with sensitive data
+config.local.json
+config.*.json
+
+# Build output
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+__debug_bin*
