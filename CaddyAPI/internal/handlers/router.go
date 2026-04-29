@@ -156,7 +156,6 @@ func NewRouter() *gin.Engine {
 		api.GET("/caddy/detect", DetectCaddy)
 		api.POST("/caddy/install", InstallCaddy)
 		api.GET("/caddy/status", GetCaddyStatus)
-		api.POST("/caddy/reload", ReloadCaddy)
 		api.GET("/caddy/check-install", CheckCaddyInstallStatus)
 		api.POST("/caddy/init", InitCaddy)
 

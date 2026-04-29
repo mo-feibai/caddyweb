@@ -17,7 +17,6 @@ type Config struct {
 	Theme         string        `json:"theme"`
 	Language      string        `json:"language"`
 	FirstLaunch   bool          `json:"first_launch"`
-	ReloadMode    string        `json:"reload_mode"`
 }
 
 type CaddySettings struct {
@@ -44,7 +43,6 @@ var (
 		Theme:       "light",
 		Language:    "zh-CN",
 		FirstLaunch: true,
-		ReloadMode:  "auto",
 	}
 	manager     *ConfigManager
 	managerOnce sync.Once

@@ -74,7 +74,6 @@ export const settingsAPI = {
     get: () => api.get('/settings'),
     save: (data: any) => api.post('/settings', data),
     detectCaddy: () => api.get('/caddy/detect'),
-    reloadCaddy: () => api.post('/caddy/reload'),
     installCaddy: (installType: string) => api.post('/caddy/install', { installType }),
     getCaddyStatus: () => api.get('/caddy/status'),
     checkCaddyInstallStatus: () => api.get('/caddy/check-install'),

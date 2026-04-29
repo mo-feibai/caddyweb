@@ -49,9 +49,6 @@ func UpdateSettings(c *gin.Context) {
 	if language, ok := updates["language"].(string); ok {
 		cfg.Language = language
 	}
-	if reloadMode, ok := updates["reloadMode"].(string); ok {
-		cfg.ReloadMode = reloadMode
-	}
 	if caddySettings, ok := updates["caddy"].(map[string]interface{}); ok {
 		if unixSocket, ok := caddySettings["unixSocket"].(string); ok {
 			cfg.CaddySettings.UnixSocket = unixSocket
@@ -307,22 +304,4 @@ func InitCaddy(c *gin.Context) {
 		"server_id": secureServerID,
 		"ports":     []string{":80", ":443"},
 	})
-}
-
-// ReloadCaddy 重新加载 Caddy 配置
-func ReloadCaddy(c *gin.Context) {
-	if err := caddyClient.CheckConnection(); err != nil {
-		log.Printf("[ERROR] Caddy is not running: %v", err)
-		SuccessWithMessage(c, "Caddy is not running", gin.H{"success": false})
-		return
-	}
-
-	if err := caddyClient.LoadConfig(); err != nil {
-		log.Printf("[ERROR] Failed to reload Caddy config: %v", err)
-		SuccessWithMessage(c, "Failed to reload Caddy", gin.H{"success": false})
-		return
-	}
-
-	log.Printf("[INFO] Caddy config reloaded successfully")
-	SuccessWithMessage(c, "Caddy config reloaded", gin.H{"success": true})
 }

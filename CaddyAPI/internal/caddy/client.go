@@ -225,11 +225,6 @@ func (c *Client) PatchConfigPath(path string, withId bool, data interface{}) err
 	return c.config("PATCH", path, withId, data)
 }
 
-func (c *Client) LoadConfig() error {
-	_, err := c.doRequest("POST", "/load", nil)
-	return err
-}
-
 func (c *Client) CheckConnection() error {
 	// 使用 systemctl 检查 Caddy 服务状态
 	cmd := exec.Command("systemctl", "is-active", "caddy")

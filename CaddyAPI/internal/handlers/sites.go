@@ -19,7 +19,7 @@ type Site struct {
 	Type        string `json:"type"`         // Type: static, reverse_proxy
 	Upstream    string `json:"upstream"`     // Upstream server (reverse proxy)
 	Root        string `json:"root"`         // Static files directory
-	IndexNames  string `json:"index_names"`      // Default documents, space-separated
+	IndexNames  string `json:"index_names"`  // Default documents, space-separated
 	HealthCheck bool   `json:"health_check"` // Health check
 	ID          string `json:"id"`           // Handle ID, e.g., "uuid"
 	ServerID    string `json:"server_id"`    // Server ID
@@ -69,7 +69,7 @@ func ListSites(c *gin.Context) {
 									r.Upstream = leaf.Upstreams[0].Dial
 								}
 								r.HealthCheck = leaf.HealthChecks != nil && leaf.HealthChecks.Active != nil
-														case "file_server":
+							case "file_server":
 								r.Type = "static"
 								r.Root = leaf.Root
 								r.IndexNames = strings.Join(leaf.IndexNames, " ")
@@ -153,8 +153,8 @@ func CreateSite(c *gin.Context) {
 		ID          string `json:"id"`                      // Optional ID
 		Upstream    string `json:"upstream"`                // Upstream for reverse proxy
 		Root        string `json:"root"`                    // Root directory for static
-		IndexNames  string `json:"index_names"`            // Default documents
-		HealthCheck bool   `json:"health_check"`           // Health check
+		IndexNames  string `json:"index_names"`             // Default documents
+		HealthCheck bool   `json:"health_check"`            // Health check
 		Domain      string `json:"domain"`
 	}
 
@@ -257,13 +257,11 @@ func createLeaf(siteType, upstream, root, indexes string, healthCheck bool) cadd
 	var leaf caddy.Route
 	if siteType == "static" {
 		leaf = caddy.Route{
-			Handle:   []caddy.Handle{{Handler: "file_server", Root: root, IndexNames: parseIndexes(indexes)}},
-			Terminal: true,
+			Handle: []caddy.Handle{{Handler: "file_server", Root: root, IndexNames: parseIndexes(indexes)}},
 		}
 	} else {
 		leaf = caddy.Route{
-			Handle:   []caddy.Handle{{Handler: "reverse_proxy", Upstreams: []caddy.Upstream{{Dial: upstream}}}},
-			Terminal: true,
+			Handle: []caddy.Handle{{Handler: "reverse_proxy", Upstreams: []caddy.Upstream{{Dial: upstream}}}},
 		}
 		if healthCheck {
 			leaf.Handle[0].HealthChecks = &caddy.HealthChecks{Active: &caddy.ActiveHealthCheck{Path: "/", Interval: "10s", Timeout: "5s"}}
