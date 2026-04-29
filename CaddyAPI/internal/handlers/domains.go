@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"strings"
 
@@ -28,7 +27,7 @@ type SiteRoute struct {
 	Type        string `json:"type"`         // Type: static, reverse_proxy
 	Upstream    string `json:"upstream"`     // Upstream server (reverse proxy)
 	Root        string `json:"root"`         // Static files directory
-	IndexNames  string `json:"index_names"`      // Default documents, space-separated
+	IndexNames  string `json:"index_names"`  // Default documents, space-separated
 	HealthCheck bool   `json:"health_check"` // Health check
 	ID          string `json:"id"`           // Route ID
 	DomainID    string `json:"domainID"`     // Domain ID
@@ -47,9 +46,9 @@ func ListDomains(c *gin.Context) {
 	domainMap := make(map[string]Domain)
 
 	for serverID, server := range servers {
-		for id, route := range server.NamedRoutes {
+		for _, route := range server.Routes {
 			var baseDomain, wildcardDomain string
-			handleID := id
+			handleID := route.Id
 			for _, match := range route.Match {
 				for _, h := range match.Host {
 					if len(h) > 1 && h[0] == '*' {
@@ -154,9 +153,10 @@ func CreateDomain(c *gin.Context) {
 	domain := req.Name
 	wildcard := "*." + domain
 
-	serverPath := req.ServerID + "/named_routes/" + req.ID
+	serverPath := req.ServerID + "/routes"
 
 	newRoute := caddy.Route{
+		Id: req.ID,
 		Match: []caddy.Match{
 			{
 				Host: []string{domain, wildcard},
@@ -165,7 +165,6 @@ func CreateDomain(c *gin.Context) {
 		Handle: []caddy.Handle{
 			{
 				Handler: "subroute",
-				Id:      req.ID,
 				Routes:  make([]caddy.Route, 0),
 			},
 		},
@@ -181,55 +180,6 @@ func CreateDomain(c *gin.Context) {
 	SuccessWithMessage(c, "Domain created", gin.H{"name": req.Name, "server_id": req.ServerID, "id": req.ID})
 }
 
-// UpdateDomain updates a domain configuration
-func UpdateDomain(c *gin.Context) {
-	name := c.Param("name")
-
-	var req struct {
-		Listen     string `json:"listen"`
-		TLSEnabled bool   `json:"tls"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
-		BadRequest(c, "Invalid request body")
-		return
-	}
-
-	// Get existing config
-	path := "apps/http/servers/" + name
-	data, err := caddyClient.GetConfigPath(path, true)
-	if err != nil {
-		NotFound(c, "Domain not found")
-		return
-	}
-
-	var serverConfig caddy.Server
-	if err := json.Unmarshal(data, &serverConfig); err != nil {
-		InternalServerError(c, "Failed to parse domain config")
-		return
-	}
-
-	// Update fields
-	if req.Listen != "" {
-		serverConfig.Listen = []string{req.Listen}
-	}
-
-	if req.TLSEnabled && len(serverConfig.TLSPolicies) == 0 {
-		serverConfig.TLSPolicies = []caddy.TLSPolicy{{}}
-	} else if !req.TLSEnabled && len(serverConfig.TLSPolicies) > 0 {
-		serverConfig.TLSPolicies = nil
-	}
-
-	// Save
-	if err := caddyClient.PutConfigPath(path, false, serverConfig); err != nil {
-		log.Printf("[ERROR] Failed to update domain: %v", err)
-		InternalServerError(c, "Failed to update domain")
-		return
-	}
-
-	SuccessWithMessage(c, "Domain updated", nil)
-}
-
 // DeleteDomain deletes a domain
 func DeleteDomain(c *gin.Context) {
 	serverID := c.Param("server_id")
@@ -240,8 +190,8 @@ func DeleteDomain(c *gin.Context) {
 		return
 	}
 
-	path := fmt.Sprintf("%s/named_routes/%s", serverID, domainID)
-	data, err := caddyClient.GetConfigPath(path, true)
+	path := domainID
+	data, err := caddyClient.GetConfigPath(domainID, true)
 	if err != nil {
 		NotFound(c, "Domain not found")
 		return
@@ -293,61 +243,48 @@ func GetDomainSites(c *gin.Context) {
 		return
 	}
 
-	var serverConfig struct {
-		Routes []struct {
-			Id       string         `json:"@id"`
-			Match    []caddy.Match  `json:"match"`
-			Handle   []caddy.Handle `json:"handle"`
-			Terminal bool           `json:"terminal"`
-		} `json:"routes"`
-	}
-	if err := json.Unmarshal(data, &serverConfig); err != nil {
+	var domainRoute caddy.Route
+	if err := json.Unmarshal(data, &domainRoute); err != nil {
 		InternalServerError(c, "Failed to parse domain config")
 		return
 	}
 
 	sites := make([]SiteRoute, 0)
 
-	for _, route := range serverConfig.Routes {
-		r := SiteRoute{DomainID: domainID}
-		if route.Id != "" {
-			r.ID = route.Id
-		}
-		for _, m := range route.Match {
-			if len(m.Host) > 0 {
-				host := m.Host[0]
-				r.Host = host
-				if base, ok := strings.CutPrefix(host, "*."); ok {
-					// wildcard domain like *.example.com -> DomainID = example.com, Name unknown
-					r.DomainID = base
-					r.Name = ""
-				} else if strings.Contains(host, ".") {
-					parts := strings.SplitN(host, ".", 2)
-					r.Name = parts[0]
-				} else {
-					r.Name = host
-				}
+	r := SiteRoute{DomainID: domainID}
+	for _, m := range domainRoute.Match {
+		if len(m.Host) > 0 {
+			host := m.Host[0]
+			r.Host = host
+			if _, ok := strings.CutPrefix(host, "*."); ok {
+				// wildcard domain like *.example.com -> DomainID = example.com, Name unknown
+				r.Name = ""
+			} else if strings.Contains(host, ".") {
+				parts := strings.SplitN(host, ".", 2)
+				r.Name = parts[0]
+			} else {
+				r.Name = host
 			}
 		}
-		for _, sub := range route.Handle {
-			if sub.Handler == "subroute" {
-				for _, leaf := range sub.Routes {
-					// leaf's own handles determine type/upstream/root
-					for _, hl := range leaf.Handle {
-						r.Type = hl.Handler
-						if hl.Id != "" {
-							r.ID = hl.Id
-						}
-						if hl.Handler == "reverse_proxy" && len(hl.Upstreams) > 0 {
-							r.Upstream = hl.Upstreams[0].Dial
-							r.HealthCheck = hl.HealthChecks != nil && hl.HealthChecks.Active != nil
-						} else if hl.Handler == "file_server" {
-							r.Root = hl.Root
-							r.IndexNames = strings.Join(hl.IndexNames, " ")
-						}
-					}
-					sites = append(sites, r)
+	}
+	for _, sub := range domainRoute.Handle {
+		if sub.Handler == "subroute" {
+			for _, leaf := range sub.Routes {
+				if leaf.Id != "" {
+					r.ID = leaf.Id
 				}
+				handle := findLeafHandler(leaf.Handle)
+
+				r.Type = handle.Handler
+				if handle.Handler == "reverse_proxy" && len(handle.Upstreams) > 0 {
+					r.Upstream = handle.Upstreams[0].Dial
+					r.HealthCheck = handle.HealthChecks != nil && handle.HealthChecks.Active != nil
+				} else if handle.Handler == "file_server" {
+					r.Root = handle.Root
+					r.IndexNames = strings.Join(handle.IndexNames, " ")
+				}
+
+				sites = append(sites, r)
 			}
 		}
 	}

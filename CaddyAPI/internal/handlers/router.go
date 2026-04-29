@@ -175,13 +175,14 @@ func NewRouter() *gin.Engine {
 
 		// Domain operations (must be after specific routes)
 		api.GET("/domains/:name", GetDomain)
-		api.PUT("/domains/:name", UpdateDomain)
-		api.GET("/domains/:name/sites/:site", GetSite)
 		api.POST("/domains/:id/sites", CreateSite)
 		api.PUT("/sites/:id", UpdateSite)
 
 		// Site delete
 		api.DELETE("/sites/:domain_id/:site_id", DeleteSite)
+
+		// Certificate management
+		api.POST("/certs", AddCertificate)
 	}
 
 	_ = &Router{

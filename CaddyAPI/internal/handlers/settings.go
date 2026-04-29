@@ -268,15 +268,15 @@ func InitCaddy(c *gin.Context) {
 	httpServerID := "caddyweb_http"
 
 	secureServerConfig := map[string]interface{}{
-		"@id":          secureServerID,
-		"listen":       []string{":443"},
-		"named_routes": map[string]interface{}{},
+		"@id":    secureServerID,
+		"listen": []string{":443"},
+		"routes": []interface{}{},
 	}
 
 	httpServerConfig := map[string]interface{}{
-		"@id":          httpServerID,
-		"listen":       []string{":80"},
-		"named_routes": map[string]interface{}{},
+		"@id":    httpServerID,
+		"listen": []string{":80"},
+		"routes": []interface{}{},
 	}
 
 	caddyClient.DeleteConfigPath("apps/http/servers", false)

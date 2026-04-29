@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"slices"
 	"strings"
 
 	"github.com/caddyweb/caddyapi/internal/caddy"
@@ -37,8 +36,8 @@ func ListSites(c *gin.Context) {
 	allSites := make([]Site, 0)
 
 	for serverID, server := range httpConfig.Servers {
-		for domainID, namedRoute := range server.NamedRoutes {
-			for _, handle := range namedRoute.Handle {
+		for _, route := range server.Routes {
+			for _, handle := range route.Handle {
 				if handle.Handler == "subroute" && len(handle.Routes) > 0 {
 					for _, subroute := range handle.Routes {
 						r := Site{ServerID: serverID}
@@ -76,7 +75,7 @@ func ListSites(c *gin.Context) {
 							}
 						}
 						if r.ID == "" {
-							r.ID = domainID
+							r.ID = handle.Id
 						}
 						allSites = append(allSites, r)
 					}
@@ -86,61 +85,6 @@ func ListSites(c *gin.Context) {
 	}
 
 	Success(c, allSites)
-}
-
-// GetSite returns a single site by domain and name
-func GetSite(c *gin.Context) {
-	domainName := c.Param("name")
-	siteName := c.Param("site")
-	fullHost := siteName + "." + domainName
-
-	httpConfig, err := caddyClient.GetHTTPConfig()
-	if err != nil {
-		InternalServerError(c, "Failed to get site")
-		return
-	}
-
-	server, ok := httpConfig.Servers[domainName]
-	if !ok {
-		NotFound(c, "Domain not found")
-		return
-	}
-
-	for _, route := range server.Routes {
-		for _, handle := range route.Handle {
-			if handle.Handler == "subroute" && len(handle.Routes) > 0 {
-				for _, subroute := range handle.Routes {
-					found := false
-					for _, match := range subroute.Match {
-						if len(match.Host) > 0 && match.Host[0] == fullHost {
-							found = true
-							break
-						}
-					}
-					if found {
-						site := Site{Name: siteName, Host: fullHost}
-						for _, h := range subroute.Handle {
-							site.Type = h.Handler
-							if h.Id != "" {
-								site.ID = h.Id
-							}
-							if h.Handler == "reverse_proxy" && len(h.Upstreams) > 0 {
-								site.Upstream = h.Upstreams[0].Dial
-								site.HealthCheck = h.HealthChecks != nil && h.HealthChecks.Active != nil
-							} else if h.Handler == "file_server" {
-								site.Root = h.Root
-								site.IndexNames = strings.Join(h.IndexNames, " ")
-							}
-						}
-						Success(c, site)
-						return
-					}
-				}
-			}
-		}
-	}
-
-	NotFound(c, "Site not found")
 }
 
 // CreateSite creates a new site under a domain
@@ -180,10 +124,9 @@ func CreateSite(c *gin.Context) {
 				Routes:  []caddy.Route{leaf},
 			},
 		},
-		Terminal: true,
 	}
 
-	path := domainID + "/routes/..."
+	path := domainID + "/handle/0/routes/..."
 	if err := caddyClient.PostConfigPath(path, true, []caddy.Route{newSubRoute}); err != nil {
 		log.Printf("[ERROR] Failed to create site: %v", err)
 		InternalServerError(c, "Failed to create site")
@@ -294,53 +237,6 @@ func deleteSiteByID(c *gin.Context, serverID, siteID string) error {
 
 	SuccessWithMessage(c, "Site deleted", nil)
 	return nil
-}
-
-func deleteSiteByHost(c *gin.Context, domainName, fullHost string) {
-	path := "apps/http/servers/" + domainName
-	data, err := caddyClient.GetConfigPath(path, false)
-	if err != nil {
-		InternalServerError(c, "Domain not found")
-		return
-	}
-
-	var serverConfig caddy.Server
-	if err := json.Unmarshal(data, &serverConfig); err != nil {
-		InternalServerError(c, "Failed to parse domain config")
-		return
-	}
-
-	for i := range serverConfig.Routes {
-		for j := range serverConfig.Routes[i].Handle {
-			if serverConfig.Routes[i].Handle[j].Handler == "subroute" {
-				subroutes := serverConfig.Routes[i].Handle[j].Routes
-				newSubroutes := make([]caddy.Route, 0, len(subroutes))
-				for _, sr := range subroutes {
-					keep := true
-					for _, m := range sr.Match {
-						if slices.Contains(m.Host, fullHost) {
-							keep = false
-						}
-						if !keep {
-							break
-						}
-					}
-					if keep {
-						newSubroutes = append(newSubroutes, sr)
-					}
-				}
-				serverConfig.Routes[i].Handle[j].Routes = newSubroutes
-			}
-		}
-	}
-
-	if err := caddyClient.PostConfigPath(path, false, serverConfig); err != nil {
-		log.Printf("[ERROR] Failed to delete site: %v", err)
-		InternalServerError(c, "Failed to delete site")
-		return
-	}
-
-	SuccessWithMessage(c, "Site deleted", nil)
 }
 
 func findLeafHandler(handles []caddy.Handle) *caddy.Handle {
