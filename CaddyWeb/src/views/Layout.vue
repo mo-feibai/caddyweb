@@ -1,82 +1,91 @@
 <template>
     <el-container class="layout-container">
-        <el-aside width="200px" class="sidebar">
+        <el-aside width="240px" class="sidebar">
             <div class="logo">
-                <h3>🚀 CaddyWeb</h3>
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-name">CaddyWeb</span>
+                    <span class="logo-version">v2.0</span>
+                </div>
             </div>
-            <el-menu :default-active="activeMenu" router class="sidebar-menu" background-color="#304156"
-                text-color="#bfcbd9" active-text-color="#409EFF">
+
+            <el-menu :default-active="activeMenu" router class="sidebar-menu">
                 <el-menu-item index="/web/dashboard">
-                    <el-icon>
-                        <DataAnalysis />
-                    </el-icon>
+                    <el-icon><DataAnalysis /></el-icon>
                     <span>仪表盘</span>
                 </el-menu-item>
                 <el-menu-item index="/web/domains">
-                    <el-icon>
-                        <Link />
-                    </el-icon>
+                    <el-icon><Link /></el-icon>
                     <span>域名管理</span>
                 </el-menu-item>
                 <el-menu-item index="/web/sites">
-                    <el-icon>
-                        <Folder />
-                    </el-icon>
+                    <el-icon><Folder /></el-icon>
                     <span>子站点</span>
                 </el-menu-item>
                 <el-menu-item index="/web/tls">
-                    <el-icon>
-                        <Lock />
-                    </el-icon>
+                    <el-icon><Lock /></el-icon>
                     <span>SSL 证书</span>
                 </el-menu-item>
                 <el-menu-item index="/web/logs">
-                    <el-icon>
-                        <Document />
-                    </el-icon>
+                    <el-icon><Document /></el-icon>
                     <span>访问日志</span>
                 </el-menu-item>
-                <el-divider />
+
+                <div class="menu-divider"></div>
+
                 <el-menu-item index="/web/settings">
-                    <el-icon>
-                        <Setting />
-                    </el-icon>
+                    <el-icon><Setting /></el-icon>
                     <span>系统设置</span>
                 </el-menu-item>
             </el-menu>
+
+            <div class="sidebar-footer">
+                <div class="status-dot" :class="caddyStatus"></div>
+                <span class="status-label">{{ caddyStatus === 'running' ? 'Caddy2 运行中' : 'Caddy2 已停止' }}</span>
+            </div>
         </el-aside>
 
-        <el-container>
+        <el-container class="main-wrapper">
             <el-header class="header">
                 <div class="header-left">
-                    <el-breadcrumb separator="/">
-                        <el-breadcrumb-item :to="{ path: '/web/dashboard' }">首页</el-breadcrumb-item>
-                        <el-breadcrumb-item v-if="currentRoute">{{ currentRoute }}</el-breadcrumb-item>
-                    </el-breadcrumb>
+                    <div class="breadcrumb-wrapper">
+                        <el-breadcrumb separator="/">
+                            <el-breadcrumb-item :to="{ path: '/web/dashboard' }">
+                                <span class="breadcrumb-home">首页</span>
+                            </el-breadcrumb-item>
+                            <el-breadcrumb-item v-if="currentRoute">{{ currentRoute }}</el-breadcrumb-item>
+                        </el-breadcrumb>
+                    </div>
                 </div>
+
                 <div class="header-right">
-                    <el-button v-if="settingsStore.settings.reloadMode === 'manual' && settingsStore.needsReload" size="small" type="warning" @click="reloadCaddy">
-                        <el-icon>
-                            <Refresh />
-                        </el-icon>
-                        <span style="margin-left: 4px">重载 Caddy</span>
-                    </el-button>
-                    <el-button size="small" @click="checkCaddyStatus" :type="caddyStatus === 'running' ? 'success' : 'danger'">
-                        <el-icon>
-                            <Refresh />
-                        </el-icon>
-                        <span style="margin-left: 4px">{{ caddyStatus === 'running' ? 'Caddy2 运行中' : 'Caddy2 已停止' }}</span>
-                    </el-button>
-                    <el-dropdown @command="handleCommand">
-                        <el-button size="small">
-                            <el-icon>
-                                <User />
-                            </el-icon>
-                        </el-button>
+                    <div class="caddy-indicator" :class="caddyStatus" @click="checkCaddyStatus">
+                        <div class="indicator-dot"></div>
+                        <span class="indicator-text">{{ caddyStatus === 'running' ? '运行中' : '已停止' }}</span>
+                    </div>
+
+                    <el-dropdown @command="handleCommand" trigger="click">
+                        <button class="user-btn">
+                            <div class="user-avatar">
+                                <el-icon><User /></el-icon>
+                            </div>
+                        </button>
                         <template #dropdown>
                             <el-dropdown-menu>
-                                <el-dropdown-item command="settings">设置</el-dropdown-item>
-                                <el-dropdown-item command="logout" divided>退出</el-dropdown-item>
+                                <el-dropdown-item command="settings">
+                                    <el-icon><Setting /></el-icon>
+                                    <span>设置</span>
+                                </el-dropdown-item>
+                                <el-dropdown-item command="logout" divided>
+                                    <el-icon><SwitchButton /></el-icon>
+                                    <span>退出</span>
+                                </el-dropdown-item>
                             </el-dropdown-menu>
                         </template>
                     </el-dropdown>
@@ -94,10 +103,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSettingsStore } from '@/stores/settings'
-import { caddyAPI, settingsAPI } from '@/api'
+import { settingsAPI } from '@/api'
 import {
     DataAnalysis, Folder, Connection, Lock, Document,
-    Setting, Refresh, User, Link
+    Setting, User, Link, SwitchButton
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
@@ -126,12 +135,8 @@ const checkCaddyStatus = async () => {
     try {
         const res = await settingsAPI.getCaddyStatus()
         caddyStatus.value = res.status === 'running' ? 'running' : 'stopped'
-        if (res.status === 'running') {
-            ElMessage.success('Caddy2 运行正常')
-        } else {
-            ElMessage.error('Caddy2 未运行')
-        }
-    } catch (error) {
+        ElMessage.success('Caddy2 运行正常')
+    } catch {
         caddyStatus.value = 'stopped'
         ElMessage.error('无法连接到 Caddy2')
     }
@@ -148,16 +153,6 @@ const handleCommand = (command: string) => {
     }
 }
 
-const reloadCaddy = async () => {
-    try {
-        await settingsAPI.reloadCaddy()
-        settingsStore.clearNeedsReload()
-        ElMessage.success('Caddy2 配置重载成功')
-    } catch (error) {
-        ElMessage.error('配置重载失败')
-    }
-}
-
 onMounted(() => {
     settingsStore.loadSettings()
     checkCaddyStatus()
@@ -167,68 +162,219 @@ onMounted(() => {
 <style scoped lang="scss">
 .layout-container {
     height: 100vh;
+    background: var(--bg-primary);
 }
 
 .sidebar {
-    background-color: #304156;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    position: relative;
 
-    .logo {
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #2b3a4b;
-
-        h3 {
-            color: #fff;
-            margin: 0;
-            font-size: 18px;
-        }
-    }
-
-    .sidebar-menu {
-        border-right: none;
-
-        :deep(.el-menu-item) {
-            &.is-active {
-                background-color: #263445 !important;
-            }
-
-            &:hover {
-                background-color: #263445 !important;
-            }
-        }
-    }
-
-    :deep(.el-divider) {
-        margin: 10px 0;
-        background-color: #4a5568;
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 1px;
+        height: 100%;
+        background: linear-gradient(
+            180deg,
+            transparent 0%,
+            var(--accent-cyan) 20%,
+            var(--accent-cyan) 80%,
+            transparent 100%
+        );
+        opacity: 0.1;
     }
 }
 
+.logo {
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+
+    .logo-icon {
+        width: 44px;
+        height: 44px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--glow-cyan);
+    }
+
+    .logo-text {
+        display: flex;
+        flex-direction: column;
+
+        .logo-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-version {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    }
+}
+
+.sidebar-menu {
+    flex: 1;
+    padding: 16px 12px;
+
+    .el-menu-item {
+        margin-bottom: 4px;
+
+        .el-icon {
+            font-size: 16px;
+        }
+    }
+}
+
+.menu-divider {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: 12px 8px;
+}
+
+.sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-secondary);
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent-magenta);
+
+        &.running {
+            background: var(--accent-cyan);
+            box-shadow: 0 0 8px var(--accent-cyan);
+        }
+    }
+
+    .status-label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--text-secondary);
+    }
+}
+
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
 .header {
-    background-color: #fff;
-    box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-subtle);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 28px;
+    height: 64px;
+    backdrop-filter: blur(10px);
+}
 
-    .header-left {
-        display: flex;
-        align-items: center;
+.breadcrumb-wrapper {
+    :deep(.el-breadcrumb__inner) {
+        font-weight: 500;
+
+        &.is-link:hover {
+            color: var(--accent-cyan);
+        }
     }
 
-    .header-right {
-        display: flex;
-        align-items: center;
-        gap: 15px;
+    .breadcrumb-home {
+        color: var(--text-muted);
+    }
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.caddy-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--bg-hover);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+
+    &:hover {
+        border-color: var(--border-active);
+        background: var(--bg-active);
+    }
+
+    .indicator-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent-magenta);
+        transition: var(--transition-fast);
+    }
+
+    &.running .indicator-dot {
+        background: var(--accent-cyan);
+        box-shadow: 0 0 8px var(--accent-cyan);
+    }
+
+    .indicator-text {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+}
+
+.user-btn {
+    background: var(--bg-hover);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-smooth);
+
+    &:hover {
+        border-color: var(--accent-cyan);
+        background: var(--bg-active);
+    }
+
+    .user-avatar {
+        color: var(--text-secondary);
     }
 }
 
 .main-content {
-    background-color: #f0f2f5;
-    padding: 20px;
+    background: var(--bg-primary);
+    padding: 28px;
     overflow-y: auto;
+    flex: 1;
 }
 </style>

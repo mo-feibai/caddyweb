@@ -1,136 +1,126 @@
 <template>
     <div class="dashboard-container">
-        <el-row :gutter="20" class="stats-row">
-            <el-col :span="6">
-                <el-card shadow="hover" class="stat-card">
-                    <div class="stat-icon sites"><el-icon>
-                            <Folder />
-                        </el-icon></div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ stats.totalSites }}</div>
-                        <div class="stat-label">站点总数</div>
-                    </div>
-                </el-card>
-            </el-col>
-            <el-col :span="6">
-                <el-card shadow="hover" class="stat-card">
-                    <div class="stat-icon active"><el-icon>
-                            <CircleCheck />
-                        </el-icon></div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ stats.activeSites }}</div>
-                        <div class="stat-label">运行中</div>
-                    </div>
-                </el-card>
-            </el-col>
-            <el-col :span="6">
-                <el-card shadow="hover" class="stat-card">
-                    <div class="stat-icon proxies"><el-icon>
-                            <Connection />
-                        </el-icon></div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ stats.totalProxies }}</div>
-                        <div class="stat-label">代理数量</div>
-                    </div>
-                </el-card>
-            </el-col>
-            <el-col :span="6">
-                <el-card shadow="hover" class="stat-card">
-                    <div class="stat-icon certs"><el-icon>
-                            <Lock />
-                        </el-icon></div>
-                    <div class="stat-content">
-                        <div class="stat-value">{{ stats.sslCerts }}</div>
-                        <div class="stat-label">SSL 证书</div>
-                    </div>
-                </el-card>
-            </el-col>
-        </el-row>
+        <div class="dashboard-header">
+            <div class="header-content">
+                <h1 class="page-title">仪表盘</h1>
+                <p class="page-subtitle">实时监控系统状态</p>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn" @click="reloadCaddy">
+                    <el-icon><Refresh /></el-icon>
+                    <span>重载配置</span>
+                </button>
+            </div>
+        </div>
 
-        <el-row :gutter="20">
-            <el-col :span="16">
-                <el-card class="main-card">
-                    <template #header>
-                        <div class="card-header">
-                            <span>最近站点</span>
-                            <el-button type="primary" size="small" @click="$router.push('/web/sites/add')">
-                                <el-icon>
-                                    <Plus />
-                                </el-icon> 添加站点
-                            </el-button>
+        <div class="stats-grid">
+            <div class="stat-card" v-for="(stat, index) in statsData" :key="stat.label" :style="{ animationDelay: `${index * 100}ms` }">
+                <div class="stat-icon" :class="stat.color">
+                    <el-icon :size="24"><component :is="stat.icon" /></el-icon>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ stat.value }}</div>
+                    <div class="stat-label">{{ stat.label }}</div>
+                </div>
+                <div class="stat-glow"></div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="panel sites-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <el-icon><Folder /></el-icon>
+                        <span>最近站点</span>
+                    </h2>
+                    <el-button type="primary" size="small" @click="$router.push('/web/sites/add')">
+                        <el-icon><Plus /></el-icon>
+                        添加站点
+                    </el-button>
+                </div>
+
+                <div class="sites-list">
+                    <div class="site-item" v-for="site in recentSites" :key="site.id">
+                        <div class="site-info">
+                            <div class="site-domain">{{ site.domain }}</div>
+                            <div class="site-meta">
+                                <span class="site-type" :class="site.type">{{ site.type === 'reverse_proxy' ? '反向代理' : '静态站点' }}</span>
+                                <span class="site-status" :class="site.status">{{ site.status === 'active' ? '运行中' : '已停止' }}</span>
+                            </div>
                         </div>
-                    </template>
-                    <el-table :data="recentSites" stripe style="width: 100%">
-                        <el-table-column prop="domain" label="域名" min-width="180" />
-                        <el-table-column prop="type" label="类型" width="120">
-                            <template #default="{ row }">
-                                <el-tag :type="row.type === 'reverse_proxy' ? 'success' : 'info'">
-                                    {{ row.type === 'reverse_proxy' ? '反向代理' : '静态站点' }}
-                                </el-tag>
-                            </template>
-                        </el-table-column>
-                        <el-table-column prop="status" label="状态" width="100">
-                            <template #default="{ row }">
-                                <el-tag :type="row.status === 'active' ? 'success' : 'danger'" size="small">
-                                    {{ row.status === 'active' ? '运行中' : '已停止' }}
-                                </el-tag>
-                            </template>
-                        </el-table-column>
-                        <el-table-column label="操作" width="150" align="center">
-                            <template #default="{ row }">
-                                <el-button type="primary" link size="small" @click="editSite(row)">编辑</el-button>
-                                <el-button type="danger" link size="small" @click="deleteSite(row)">删除</el-button>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </el-card>
-            </el-col>
+                        <div class="site-actions">
+                            <button class="icon-btn" @click="editSite(site)">
+                                <el-icon><Edit /></el-icon>
+                            </button>
+                            <button class="icon-btn danger" @click="deleteSite(site)">
+                                <el-icon><Delete /></el-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <el-col :span="8">
-                <el-card class="main-card">
-                    <template #header>
-                        <span>Caddy2 状态</span>
-                    </template>
-                    <div class="caddy-status">
-                        <div class="status-indicator" :class="caddyStatus">
-                            <el-icon :size="48">
-                                <CircleCheck v-if="caddyStatus === 'running'" />
-                                <CircleClose v-else />
-                            </el-icon>
+            <div class="side-panels">
+                <div class="panel status-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <el-icon><Monitor /></el-icon>
+                            <span>Caddy2 状态</span>
+                        </h2>
+                    </div>
+
+                    <div class="status-display">
+                        <div class="status-ring" :class="caddyStatus">
+                            <div class="ring-dot"></div>
+                            <div class="ring-glow"></div>
                         </div>
                         <div class="status-info">
-                            <p class="status-text">{{ caddyStatusText }}</p>
-                            <p class="status-version">v{{ caddyVersion }}</p>
-                        </div>
-                        <div class="status-actions">
-                            <el-button size="small" @click="reloadCaddy">重载配置</el-button>
-                            <el-button size="small" type="primary"
-                                @click="$router.push('/web/logs')">查看日志</el-button>
+                            <div class="status-text">{{ caddyStatusText }}</div>
+                            <div class="status-version">v{{ caddyVersion }}</div>
                         </div>
                     </div>
-                </el-card>
 
-                <el-card class="main-card mt-20">
-                    <template #header>
-                        <span>快捷操作</span>
-                    </template>
-                    <div class="quick-actions">
-                        <el-button class="action-btn" @click="$router.push('/web/tls')">
-                            <el-icon>
-                                <Lock />
-                            </el-icon>
-                            <span>SSL 证书</span>
-                        </el-button>
-                        <el-button class="action-btn" @click="$router.push('/web/settings')">
-                            <el-icon>
-                                <Setting />
-                            </el-icon>
-                            <span>系统设置</span>
-                        </el-button>
+                    <div class="status-actions">
+                        <button class="status-btn" @click="reloadCaddy">
+                            <el-icon><Refresh /></el-icon>
+                            重载配置
+                        </button>
+                        <button class="status-btn" @click="$router.push('/web/logs')">
+                            <el-icon><Document /></el-icon>
+                            查看日志
+                        </button>
                     </div>
-                </el-card>
-            </el-col>
-        </el-row>
+                </div>
+
+                <div class="panel quick-panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <el-icon><Lightning /></el-icon>
+                            <span>快捷操作</span>
+                        </h2>
+                    </div>
+
+                    <div class="quick-grid">
+                        <button class="quick-btn" @click="$router.push('/web/tls')">
+                            <el-icon><Lock /></el-icon>
+                            <span>SSL 证书</span>
+                        </button>
+                        <button class="quick-btn" @click="$router.push('/web/domains')">
+                            <el-icon><Link /></el-icon>
+                            <span>域名管理</span>
+                        </button>
+                        <button class="quick-btn" @click="$router.push('/web/settings')">
+                            <el-icon><Setting /></el-icon>
+                            <span>系统设置</span>
+                        </button>
+                        <button class="quick-btn" @click="$router.push('/web/logs')">
+                            <el-icon><DataLine /></el-icon>
+                            <span>访问日志</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -142,7 +132,8 @@ import { caddyAPI, sseAPI, settingsAPI } from '@/api'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
     Folder, CircleCheck, CircleClose, Connection, Lock,
-    Plus, Setting
+    Plus, Setting, Refresh, Monitor, Lightning,
+    Edit, Delete, Document, Link, DataLine
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -162,6 +153,13 @@ const caddyVersion = ref('')
 const caddyStatusText = computed(() =>
     caddyStatus.value === 'running' ? 'Caddy2 运行中' : 'Caddy2 已停止'
 )
+
+const statsData = computed(() => [
+    { label: '站点总数', value: stats.value.totalSites, icon: Folder, color: 'cyan' },
+    { label: '运行中', value: stats.value.activeSites, icon: CircleCheck, color: 'green' },
+    { label: '代理数量', value: stats.value.totalProxies, icon: Connection, color: 'blue' },
+    { label: 'SSL 证书', value: stats.value.sslCerts, icon: Lock, color: 'amber' }
+])
 
 const recentSites = ref([
     { id: '1', domain: 'example.com', type: 'reverse_proxy', status: 'active' },
@@ -206,7 +204,7 @@ const loadCaddyStatus = async () => {
         const res = await settingsAPI.getCaddyStatus()
         caddyVersion.value = res.version || '2.x.x'
         caddyStatus.value = res.status === 'running' ? 'running' : 'stopped'
-    } catch (error) {
+    } catch {
         caddyStatus.value = 'stopped'
         caddyVersion.value = '未知'
     }
@@ -216,7 +214,7 @@ const reloadCaddy = async () => {
     try {
         await caddyAPI.getConfig()
         ElMessage.success('Caddy2 配置重载成功')
-    } catch (error) {
+    } catch {
         ElMessage.error('配置重载失败')
     }
 }
@@ -242,7 +240,6 @@ onMounted(() => {
     loadStats()
     loadCaddyStatus()
 
-    // 建立 SSE 连接
     eventSource = sseAPI.createConnection()
 
     eventSource.addEventListener('caddy_status', (event) => {
@@ -271,127 +268,415 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .dashboard-container {
-    padding: 20px;
+    animation: fadeIn 0.4s ease-out;
 }
 
-.stats-row {
-    margin-bottom: 20px;
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+
+    .header-content {
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+    }
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 28px;
 }
 
 .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 24px;
     display: flex;
     align-items: center;
-    padding: 20px;
+    gap: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: slideUp 0.5s ease-out backwards;
 
     .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 12px;
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 20px;
-        font-size: 28px;
-        color: #fff;
+        position: relative;
 
-        &.sites {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        &.cyan {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent-cyan);
         }
 
-        &.active {
-            background: linear-gradient(135deg, #67c23a, #85ce61);
+        &.green {
+            background: rgba(103, 194, 58, 0.1);
+            color: #67c23a;
         }
 
-        &.proxies {
-            background: linear-gradient(135deg, #409eff, #66b1ff);
+        &.blue {
+            background: rgba(64, 158, 255, 0.1);
+            color: #409eff;
         }
 
-        &.certs {
-            background: linear-gradient(135deg, #e6a23c, #ebb563);
+        &.amber {
+            background: rgba(255, 184, 0, 0.1);
+            color: var(--accent-amber);
         }
     }
 
-    .stat-content {
+    .stat-info {
+        position: relative;
+        z-index: 1;
+
         .stat-value {
-            font-size: 28px;
-            font-weight: bold;
-            color: #303133;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 6px;
         }
 
         .stat-label {
-            font-size: 14px;
-            color: #909399;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+    }
+
+    .stat-glow {
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(0, 212, 255, 0.05) 0%, transparent 70%);
+    }
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+}
+
+.panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.panel-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .panel-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+
+        .el-icon {
+            color: var(--accent-cyan);
         }
     }
 }
 
-.main-card {
-    .card-header {
+.sites-panel {
+    .sites-list {
+        padding: 8px 0;
+    }
+
+    .site-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border-subtle);
+        transition: background 0.2s;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &:hover {
+            background: var(--bg-hover);
+        }
+    }
+
+    .site-info {
+        .site-domain {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .site-meta {
+            display: flex;
+            gap: 12px;
+        }
+
+        .site-type, .site-status {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .site-type {
+            background: rgba(64, 158, 255, 0.1);
+            color: #409eff;
+
+            &.static {
+                background: rgba(103, 194, 58, 0.1);
+                color: #67c23a;
+            }
+        }
+
+        .site-status {
+            background: rgba(255, 184, 0, 0.1);
+            color: var(--accent-amber);
+
+            &.active {
+                background: rgba(103, 194, 58, 0.1);
+                color: #67c23a;
+            }
+        }
+    }
+
+    .site-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .icon-btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        background: var(--bg-hover);
+        color: var(--text-secondary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+
+        &:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        &.danger:hover {
+            border-color: var(--accent-magenta);
+            color: var(--accent-magenta);
+        }
     }
 }
 
-.mt-20 {
-    margin-top: 20px;
+.side-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
-.caddy-status {
-    text-align: center;
-    padding: 20px 0;
+.status-panel {
+    .status-display {
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
 
-    .status-indicator {
-        margin-bottom: 15px;
-        color: #67c23a;
+    .status-ring {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 3px solid var(--text-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
 
-        &.stopped {
-            color: #f56c6c;
+        &.running {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+
+            .ring-dot {
+                width: 16px;
+                height: 16px;
+                background: var(--accent-cyan);
+                border-radius: 50%;
+                box-shadow: 0 0 10px var(--accent-cyan);
+            }
+        }
+
+        .ring-dot {
+            width: 12px;
+            height: 12px;
+            background: var(--text-muted);
+            border-radius: 50%;
         }
     }
 
     .status-info {
+        text-align: center;
+
         .status-text {
-            font-size: 18px;
-            color: #303133;
-            margin: 0 0 5px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
         }
 
         .status-version {
-            color: #909399;
-            font-size: 14px;
-            margin: 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
         }
     }
 
     .status-actions {
-        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding: 0 24px 24px;
+    }
+
+    .status-btn {
+        padding: 12px 16px;
+        background: var(--bg-hover);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        color: var(--text-secondary);
+        font-family: var(--font-display);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
         display: flex;
-        gap: 10px;
+        align-items: center;
         justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+
+        &:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: var(--bg-active);
+        }
     }
 }
 
-.quick-actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+.quick-panel {
+    .quick-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding: 20px;
+    }
 
-    .action-btn {
+    .quick-btn {
+        padding: 16px;
+        background: var(--bg-hover);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        color: var(--text-secondary);
+        cursor: pointer;
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 20px 10px;
-        height: auto;
+        gap: 10px;
+        transition: all 0.2s;
 
         .el-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
+            font-size: 20px;
         }
 
         span {
-            font-size: 13px;
+            font-size: 12px;
+            font-weight: 500;
         }
+
+        &:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: var(--bg-active);
+            transform: translateY(-2px);
+        }
+    }
+}
+
+.action-btn {
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+
+    &:hover {
+        border-color: var(--accent-cyan);
+        color: var(--accent-cyan);
+        background: var(--bg-hover);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
     }
 }
 </style>
