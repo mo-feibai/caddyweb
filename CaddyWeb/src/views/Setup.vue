@@ -445,10 +445,196 @@ onMounted(async () => {
     max-width: 650px;
 }
 
+:deep(.el-card__header) {
+    text-align: center;
+    padding: 32px 24px;
+    border-bottom: 1px solid var(--border-subtle);
+
+    h2 {
+        margin: 0 0 10px;
+        color: var(--text-primary);
+        font-size: 24px;
+    }
+
+    .subtitle {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 14px;
+    }
+}
+
+:deep(.el-steps) {
+    margin: 40px 0;
+
+    .el-step__title {
+        color: var(--text-secondary);
+    }
+
+    .el-step__title.is-finish {
+        color: var(--el-color-primary);
+    }
+
+    .el-step__icon {
+        background: var(--bg-hover);
+        border-color: var(--border-subtle);
+    }
+
+    .el-step__icon-inner {
+        color: var(--text-muted);
+    }
+
+    .el-step__line {
+        background: var(--border-subtle);
+    }
+
+    .el-step.is-finish .el-step__line {
+        background: var(--el-color-primary);
+    }
+}
+
+.step-content {
+    min-height: 320px;
+    padding: 20px 0;
+}
+
+.step-panel {
+    h3 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: var(--text-primary);
+    }
+}
+
+.check-status,
+.detect-status,
+.init-status {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.check-message,
+.detect-message,
+.init-message {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.info-text {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin-bottom: 20px;
+
+    &.success {
+        color: var(--el-color-success);
+    }
+}
+
+.version-info {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-top: 15px;
+    font-family: var(--font-mono);
+}
+
+.help-text {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-top: 15px;
+
+    a {
+        color: var(--el-color-primary);
+    }
+}
+
+.option-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.install-progress {
+    max-width: 300px;
+    margin: 30px auto 0;
+
+    p {
+        text-align: center;
+        color: var(--text-muted);
+        margin-top: 10px;
+    }
+}
+
+.config-form {
+    max-width: 400px;
+    margin: 0 auto;
+
+    :deep(.el-form-item__label) {
+        color: var(--text-secondary);
+    }
+}
+
+.form-tip {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+.retry-section {
+    text-align: center;
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.warning-section {
+    max-width: 400px;
+    margin: 0 auto;
+
+    :deep(.el-alert) {
+        margin-bottom: 20px;
+    }
+
+    .warning-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+}
+
+.success-panel {
+    text-align: center;
+    padding: 50px 0;
+
+    h3 {
+        margin: 25px 0 15px;
+        font-size: 24px;
+        color: var(--text-primary);
+    }
+
+    p {
+        color: var(--text-secondary);
+        font-size: 16px;
+    }
+}
+
 .card-footer {
     display: flex;
     justify-content: center;
     gap: 15px;
-    padding: 15px 0;
+    padding: 20px 0;
+    border-top: 1px solid var(--border-subtle);
+}
+
+:deep(.el-radio) {
+    color: var(--text-primary);
+    margin-right: 16px;
 }
 </style>
