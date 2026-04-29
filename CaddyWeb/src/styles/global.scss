@@ -211,6 +211,23 @@ html.dark .el-button--danger {
     --el-button-text-color: #ffffff;
 }
 
+/* Link button overrides for dark theme */
+html.dark .el-button--primary.is-link {
+    color: var(--accent-cyan);
+}
+
+html.dark .el-button--primary.is-link:hover {
+    color: var(--accent-cyan-dim);
+}
+
+html.dark .el-button--danger.is-link {
+    color: var(--accent-magenta);
+}
+
+html.dark .el-button--danger.is-link:hover {
+    color: var(--accent-magenta-dim);
+}
+
 /* Card overrides */
 .el-card {
     --el-card-bg-color: var(--bg-card);
@@ -544,6 +561,30 @@ html.dark .el-button--danger {
     background: var(--el-color-primary);
     border-color: var(--el-color-primary);
     color: #ffffff;
+}
+
+/* Radio button dark mode */
+html.dark .el-radio-button__inner {
+    background: var(--bg-secondary);
+    border-color: var(--border-subtle);
+    color: var(--text-secondary);
+}
+
+html.dark .el-radio-button__inner:hover {
+    color: var(--accent-cyan);
+}
+
+html.dark .el-radio-button .el-radio-button__inner {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+}
+
+html.dark .el-radio-button.is-active .el-radio-button__inner,
+html.dark .el-radio-button.is-active .el-radio-button__inner:hover {
+    background: var(--accent-cyan) !important;
+    border-color: var(--accent-cyan) !important;
+    color: var(--bg-primary) !important;
+    box-shadow: none;
 }
 
 /* Utilities */
