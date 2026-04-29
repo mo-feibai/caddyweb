@@ -125,19 +125,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useSitesStore } from '@/stores/sites'
-import { caddyAPI, sseAPI, settingsAPI } from '@/api'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { caddyAPI, settingsAPI, sseAPI } from '@/api'
 import {
-    Folder, CircleCheck, CircleClose, Connection, Lock,
-    Plus, Setting, Refresh, Monitor, Lightning,
-    Edit, Delete, Document, Link, DataLine
+    CircleCheck,
+    Connection,
+    DataLine,
+    Delete, Document,
+    Edit,
+    Folder,
+    Lightning,
+    Link,
+    Lock,
+    Monitor,
+    Plus,
+    Refresh,
+    Setting
 } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const sitesStore = useSitesStore()
 
 let eventSource: EventSource | null = null
 

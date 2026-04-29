@@ -81,15 +81,6 @@ export const settingsAPI = {
     getServers: () => api.get('/caddy/servers'),
 }
 
-// 反向代理 API
-export const proxyAPI = {
-    list: () => api.get('/proxies'),
-    create: (data: any) => api.post('/proxies', data),
-    update: (id: string, data: any) => api.put(`/proxies/${id}`, data),
-    delete: (id: string) => api.delete(`/proxies/${id}`),
-    toggle: (id: string, enabled: boolean) => api.patch(`/proxies/${id}`, { enabled }),
-}
-
 // 日志 API
 export const logsAPI = {
     get: (params?: { limit?: number; offset?: number }) => api.get('/logs', { params }),

@@ -46,10 +46,9 @@
                         </el-icon>
                     </template>
                 </el-table-column>
-                <el-table-column label="操作" width="200" align="center">
+                <el-table-column label="操作" width="160" align="center">
                     <template #default="{ row }">
                         <el-button type="primary" link size="small" @click="viewDomainSites(row)">子站点</el-button>
-                        <el-button type="primary" link size="small" @click="editDomain(row)">编辑</el-button>
                         <el-button type="danger" link size="small" @click="deleteDomain(row)">删除</el-button>
                     </template>
                 </el-table-column>
@@ -57,15 +56,15 @@
         </el-card>
 
         <!-- 添加/编辑域名弹窗 -->
-        <el-dialog v-model="dialogVisible" :title="isEditing ? '编辑域名' : '添加域名'" width="500px">
+        <el-dialog v-model="dialogVisible" title="添加域名" width="500px">
             <el-form ref="formRef" :model="domainForm" :rules="rules" label-width="120px">
                 <el-form-item label="域名" prop="name">
-                    <el-input v-model="domainForm.name" placeholder="example.com" :disabled="isEditing" />
+                    <el-input v-model="domainForm.name" placeholder="example.com" />
                     <div class="form-tip">基础域名，将自动匹配 *.domain</div>
                 </el-form-item>
 
                 <el-form-item label="服务器">
-                    <el-select v-model="domainForm.server_id" placeholder="选择服务器" :disabled="isEditing">
+                    <el-select v-model="domainForm.server_id" placeholder="选择服务器">
                         <el-option v-for="s in servers" :key="s.id" :label="s.id + ' (' + s.listen.join(', ') + ')'"
                             :value="s.id" />
                     </el-select>
@@ -85,7 +84,7 @@
             <template #footer>
                 <el-button @click="dialogVisible = false">取消</el-button>
                 <el-button type="primary" :loading="saving" @click="submitDomain">
-                    {{ isEditing ? '更新' : '创建' }}
+                    创建
                 </el-button>
             </template>
 
@@ -232,7 +231,6 @@ const detailVisible = ref(false)
 const sitesVisible = ref(false)
 const siteDialogVisible = ref(false)
 
-const isEditing = ref(false)
 const isEditingSite = ref(false)
 
 const currentDomain = ref<Domain | null>(null)
@@ -311,21 +309,12 @@ const loadServers = async () => {
 }
 
 const showAddDialog = async () => {
-    isEditing.value = false
     domainForm.name = ''
     domainForm.server_id = servers.value[0]?.id || ''
     domainForm.tls_enabled = true
+    domainForm.id = ''
     dialogVisible.value = true
     await loadServers()
-}
-
-const editDomain = (domain: Domain) => {
-    isEditing.value = true
-    currentDomain.value = domain
-    domainForm.name = domain.name
-    domainForm.server_id = domain.server_id || ''
-    domainForm.tls_enabled = domain.tls_enabled
-    dialogVisible.value = true
 }
 
 const submitDomain = async () => {
@@ -342,21 +331,14 @@ const submitDomain = async () => {
             data.id = domainForm.id
         }
 
-        if (isEditing.value) {
-            await domainAPI.update(domainForm.name, {
-                tls: domainForm.tls_enabled
-            })
-            ElMessage.success('域名更新成功')
-        } else {
-            await domainAPI.create(data)
-            ElMessage.success('域名创建成功')
-        }
+        await domainAPI.create(data)
+        ElMessage.success('域名创建成功')
 
         dialogVisible.value = false
         loadDomains()
     } catch (error: any) {
         if (error !== false) {
-            ElMessage.error((isEditing.value ? '更新' : '创建') + '失败: ' + error.message)
+            ElMessage.error('创建失败: ' + error.message)
         }
     } finally {
         saving.value = false
