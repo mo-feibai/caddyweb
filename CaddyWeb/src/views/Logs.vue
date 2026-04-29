@@ -242,7 +242,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .logs-container {
-    padding: 20px;
+    padding: 24px;
 }
 
 .card-header {
@@ -254,61 +254,5 @@ onMounted(() => {
 .header-actions {
     display: flex;
     align-items: center;
-}
-
-.log-stats {
-    background: #f5f7fa;
-    padding: 15px 20px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-
-    .stat-item {
-        display: flex;
-        flex-direction: column;
-
-        .stat-label {
-            font-size: 13px;
-            color: #909399;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #303133;
-
-            &.success {
-                color: #67c23a;
-            }
-
-            &.warning {
-                color: #e6a23c;
-            }
-
-            &.danger {
-                color: #f56c6c;
-            }
-        }
-    }
-}
-
-:deep(.status-success) {
-    color: #67c23a;
-    font-weight: bold;
-}
-
-:deep(.status-redirect) {
-    color: #409eff;
-    font-weight: bold;
-}
-
-:deep(.status-client-error) {
-    color: #e6a23c;
-    font-weight: bold;
-}
-
-:deep(.status-server-error) {
-    color: #f56c6c;
-    font-weight: bold;
 }
 </style>

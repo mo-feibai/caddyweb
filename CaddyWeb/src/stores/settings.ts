@@ -12,7 +12,7 @@ interface AppSettings {
   caddy: CaddySettings
   apiBaseUrl: string
   wsBaseUrl: string
-  theme: 'light' | 'dark'
+  theme: 'light' | 'dark' | 'auto'
   language: 'zh-CN' | 'en-US'
   firstLaunch: boolean
 }
@@ -27,7 +27,7 @@ export const useSettingsStore = defineStore('settings', () => {
     },
     apiBaseUrl: 'http://localhost:8081',
     wsBaseUrl: 'http://localhost:8081',
-    theme: 'light',
+    theme: 'auto',
     language: 'zh-CN',
     firstLaunch: true
   })
@@ -85,7 +85,7 @@ export const useSettingsStore = defineStore('settings', () => {
       },
       apiBaseUrl: 'http://localhost:8081',
       wsBaseUrl: 'http://localhost:8081',
-      theme: 'light',
+      theme: 'auto',
       language: 'zh-CN',
       firstLaunch: true
     }

@@ -199,9 +199,6 @@ import { domainAPI, settingsAPI, siteAPI } from '@/api'
 import { Lock, Plus, Unlock } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { onMounted, reactive, ref } from 'vue'
-import { useSettingsStore } from '@/stores/settings'
-
-const settingsStore = useSettingsStore()
 
 interface Domain {
     name: string
@@ -350,19 +347,9 @@ const submitDomain = async () => {
                 tls: domainForm.tls_enabled
             })
             ElMessage.success('域名更新成功')
-            if (settingsStore.isAutoReload) {
-                await settingsStore.autoReload()
-            } else {
-                settingsStore.markNeedsReload()
-            }
         } else {
             await domainAPI.create(data)
             ElMessage.success('域名创建成功')
-            if (settingsStore.isAutoReload) {
-                await settingsStore.autoReload()
-            } else {
-                settingsStore.markNeedsReload()
-            }
         }
 
         dialogVisible.value = false
@@ -385,11 +372,6 @@ const deleteDomain = async (domain: Domain) => {
         )
         await domainAPI.delete(domain.server_id, domain.id!)
         ElMessage.success('域名已删除')
-        if (settingsStore.isAutoReload) {
-            await settingsStore.autoReload()
-        } else {
-            settingsStore.markNeedsReload()
-        }
         loadDomains()
     } catch (error: any) {
         if (error !== 'cancel') {
@@ -469,19 +451,9 @@ const submitSite = async () => {
         if (isEditingSite.value && currentDomain.value) {
             await siteAPI.update(siteForm.id, data)
             ElMessage.success('子站点更新成功')
-            if (settingsStore.isAutoReload) {
-                await settingsStore.autoReload()
-            } else {
-                settingsStore.markNeedsReload()
-            }
         } else if (currentDomain.value) {
             await siteAPI.create(currentDomain.value.id, data)
             ElMessage.success('子站点创建成功')
-            if (settingsStore.isAutoReload) {
-                await settingsStore.autoReload()
-            } else {
-                settingsStore.markNeedsReload()
-            }
         }
 
         siteDialogVisible.value = false
@@ -507,11 +479,6 @@ const deleteSite = async (site: Site) => {
         )
         await siteAPI.delete(currentDomain.value!.id, site.id)
         ElMessage.success('子站点已删除')
-        if (settingsStore.isAutoReload) {
-            await settingsStore.autoReload()
-        } else {
-            settingsStore.markNeedsReload()
-        }
         viewDomainSites(currentDomain.value!)
     } catch (error: any) {
         if (error !== 'cancel') {
@@ -526,18 +493,8 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.site-dialog .el-dialog__body {
-    overflow-x: auto;
-}
-
-.site-dialog-content {
-    min-width: 800px;
-    display: inline-block;
-    width: 100%;
-}
-
 .domains-container {
-    padding: 20px;
+    padding: 24px;
 }
 
 .card-header {
@@ -548,20 +505,13 @@ onMounted(() => {
 
 .form-tip {
     font-size: 12px;
-    color: #909399;
-    margin-top: 5px;
-    line-height: 1.4;
+    color: var(--text-muted);
+    margin-top: 8px;
 }
 
 .sites-header {
     display: flex;
     justify-content: flex-start;
-}
-
-.domain-detail {
-    .el-descriptions {
-        margin-bottom: 20px;
-    }
 }
 
 .server-info {
@@ -571,6 +521,7 @@ onMounted(() => {
     gap: 8px;
 
     .server-id {
+        font-family: var(--font-mono);
         font-weight: 500;
     }
 }

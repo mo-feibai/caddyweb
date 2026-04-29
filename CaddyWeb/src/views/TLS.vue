@@ -236,38 +236,37 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .tls-container {
-  padding: 20px;
+    padding: 24px;
 }
 
 .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .form-tip {
-  font-size: 12px;
-  color: #909399;
-  margin-top: 5px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
 }
 
 .expiring {
-  color: #e6a23c;
-  font-weight: bold;
+    color: var(--accent-amber);
+    font-weight: 600;
 }
 
 .cert-preview {
-  margin-top: 20px;
-  background: #f5f7fa;
-  padding: 15px;
-  border-radius: 4px;
-  overflow-x: auto;
+    margin-top: 20px;
+    padding: 16px 20px;
+    overflow-x: auto;
 
-  pre {
-    margin: 0;
-    font-size: 12px;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
+    pre {
+        margin: 0;
+        font-size: 12px;
+        font-family: var(--font-mono);
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
 }
 </style>

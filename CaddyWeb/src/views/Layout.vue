@@ -105,7 +105,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
 import {
-    DataAnalysis, Folder, Connection, Lock, Document,
+    DataAnalysis, Folder, Lock, Document,
     Setting, User, Link, SwitchButton
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -162,7 +162,6 @@ onMounted(() => {
 <style scoped lang="scss">
 .layout-container {
     height: 100vh;
-    background: var(--bg-primary);
 }
 
 .sidebar {
@@ -170,24 +169,6 @@ onMounted(() => {
     border-right: 1px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
-    position: relative;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 1px;
-        height: 100%;
-        background: linear-gradient(
-            180deg,
-            transparent 0%,
-            var(--accent-cyan) 20%,
-            var(--accent-cyan) 80%,
-            transparent 100%
-        );
-        opacity: 0.1;
-    }
 }
 
 .logo {
@@ -234,14 +215,6 @@ onMounted(() => {
 .sidebar-menu {
     flex: 1;
     padding: 16px 12px;
-
-    .el-menu-item {
-        margin-bottom: 4px;
-
-        .el-icon {
-            font-size: 16px;
-        }
-    }
 }
 
 .menu-divider {
@@ -290,20 +263,11 @@ onMounted(() => {
     justify-content: space-between;
     padding: 0 28px;
     height: 64px;
-    backdrop-filter: blur(10px);
 }
 
 .breadcrumb-wrapper {
     :deep(.el-breadcrumb__inner) {
         font-weight: 500;
-
-        &.is-link:hover {
-            color: var(--accent-cyan);
-        }
-    }
-
-    .breadcrumb-home {
-        color: var(--text-muted);
     }
 }
 
@@ -322,7 +286,7 @@ onMounted(() => {
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: var(--transition-smooth);
+    transition: all 0.2s;
 
     &:hover {
         border-color: var(--border-active);
@@ -334,7 +298,7 @@ onMounted(() => {
         height: 8px;
         border-radius: 50%;
         background: var(--accent-magenta);
-        transition: var(--transition-fast);
+        transition: all 0.2s;
     }
 
     &.running .indicator-dot {
@@ -359,7 +323,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: var(--transition-smooth);
+    transition: all 0.2s;
 
     &:hover {
         border-color: var(--accent-cyan);

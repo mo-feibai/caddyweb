@@ -128,12 +128,9 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { domainAPI, siteAPI } from '@/api'
-import { useSettingsStore } from '@/stores/settings'
 import { useClipboard } from '@vueuse/core'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Check, Close, Plus, Delete } from '@element-plus/icons-vue'
-
-const settingsStore = useSettingsStore()
 
 interface Site {
     name: string
@@ -276,19 +273,9 @@ const submitSite = async () => {
         if (isEditing.value) {
             await siteAPI.update(siteForm.id, data)
             ElMessage.success('子站点更新成功')
-            if (settingsStore.isAutoReload) {
-                await settingsStore.autoReload()
-            } else {
-                settingsStore.markNeedsReload()
-            }
         } else {
             await siteAPI.create(domain!.id, data)
             ElMessage.success('子站点创建成功')
-            if (settingsStore.isAutoReload) {
-                await settingsStore.autoReload()
-            } else {
-                settingsStore.markNeedsReload()
-            }
         }
 
         dialogVisible.value = false
@@ -316,11 +303,6 @@ const deleteSite = async (site: Site) => {
         )
         await siteAPI.delete(site.server_id, site.id!)
         ElMessage.success('子站点已删除')
-        if (settingsStore.isAutoReload) {
-            await settingsStore.autoReload()
-        } else {
-            settingsStore.markNeedsReload()
-        }
         loadAllSites()
     } catch (error: any) {
         if (error !== 'cancel') {
@@ -379,11 +361,6 @@ const executeBatchDelete = async () => {
             }
         }
         ElMessage.success('批量删除成功')
-        if (settingsStore.isAutoReload) {
-            await settingsStore.autoReload()
-        } else {
-            settingsStore.markNeedsReload()
-        }
         selectedSites.value = []
         loadAllSites()
     } catch (error: any) {
@@ -401,7 +378,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .sites-container {
-    padding: 20px;
+    padding: 24px;
 }
 
 .card-header {
@@ -409,46 +386,31 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
 
-    .header-left {
-        display: flex;
-        align-items: center;
-    }
-
     .header-right {
         display: flex;
-        gap: 10px;
+        gap: 12px;
     }
 }
 
 .form-tip {
     font-size: 12px;
-    color: #909399;
-    margin-top: 5px;
-}
-
-.confirm-content {
-    text-align: center;
-}
-
-.confirm-text {
-    margin-bottom: 20px;
-    font-size: 14px;
-    color: #606266;
+    color: var(--text-muted);
+    margin-top: 8px;
 }
 
 .delete-code {
     display: inline-block;
-    padding: 2px 8px;
-    margin: 0 4px;
-    background-color: #F56C6C;
-    color: #fff;
-    border-radius: 4px;
-    font-weight: bold;
+    padding: 4px 12px;
+    margin: 0 6px;
+    color: var(--accent-magenta);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-weight: 600;
     cursor: pointer;
-    user-select: none;
-}
+    transition: all 0.2s;
 
-.delete-code:hover {
-    background-color: #f78989;
+    &:hover {
+        opacity: 0.8;
+    }
 }
 </style>

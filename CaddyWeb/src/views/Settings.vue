@@ -11,12 +11,12 @@
                         <el-divider content-position="left">连接配置</el-divider>
 
                         <el-form-item label="Unix Socket">
-                            <el-input v-model="settings.caddy.unixSocket" placeholder="/var/run/caddy/caddy.sock" />
+                            <el-input v-model="localSettings.caddy.unixSocket" placeholder="/var/run/caddy/caddy.sock" />
                             <div class="form-tip">Caddy2 Admin API 的 Unix Socket 路径</div>
                         </el-form-item>
 
                         <el-form-item label="Admin 端口">
-                            <el-input-number v-model="settings.caddy.adminPort" :min="1" :max="65535" />
+                            <el-input-number v-model="localSettings.caddy.adminPort" :min="1" :max="65535" />
                             <div class="form-tip">当不使用 Unix Socket 时使用的 TCP 端口</div>
                         </el-form-item>
                     </el-form>
@@ -27,14 +27,15 @@
                         <el-divider content-position="left">外观</el-divider>
 
                         <el-form-item label="主题">
-                            <el-radio-group v-model="settings.theme">
+                            <el-radio-group v-model="localSettings.theme">
                                 <el-radio value="light">浅色</el-radio>
                                 <el-radio value="dark">深色</el-radio>
+                                <el-radio value="auto">跟随系统</el-radio>
                             </el-radio-group>
                         </el-form-item>
 
                         <el-form-item label="语言">
-                            <el-select v-model="settings.language">
+                            <el-select v-model="localSettings.language">
                                 <el-option label="简体中文" value="zh-CN" />
                                 <el-option label="English" value="en-US" />
                             </el-select>
@@ -56,20 +57,9 @@
                             <span>{{ caddyVersion }}</span>
                         </el-form-item>
 
-                        <el-divider content-position="left">重载方式</el-divider>
-
-                        <el-form-item label="重载模式">
-                            <el-radio-group v-model="settings.reloadMode">
-                                <el-radio value="auto">自动重载</el-radio>
-                                <el-radio value="manual">手动重载</el-radio>
-                            </el-radio-group>
-                            <div class="form-tip">自动：配置变更后自动重载；手动：配置变更后需手动点击重载按钮</div>
-                        </el-form-item>
-
                         <el-divider content-position="left">操作</el-divider>
 
                         <el-form-item>
-                            <el-button type="primary" @click="reloadCaddy">重载配置</el-button>
                             <el-button @click="checkCaddyStatus">检测连接</el-button>
                         </el-form-item>
                     </el-form>
@@ -79,8 +69,8 @@
                     <div class="about-content">
                         <el-card shadow="never">
                             <div class="about-header">
-                                <h2>🚀 CaddyWeb</h2>
-                                <p class="version">v1.0.0</p>
+                                <h2>CaddyWeb</h2>
+                                <p class="version">v2.0.0</p>
                             </div>
                             <p class="description">
                                 基于 Vue3 + Go + Caddy2 的代理配置管理平台
@@ -105,9 +95,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
-import { settingsAPI, caddyAPI } from '@/api'
+import { settingsAPI } from '@/api'
 import { ElMessage } from 'element-plus'
 
 const settingsStore = useSettingsStore()
@@ -116,29 +106,34 @@ const activeTab = ref('basic')
 const caddyStatus = ref<'running' | 'stopped'>('stopped')
 const caddyVersion = ref('未知')
 
-const settings = reactive({
+const localSettings = reactive({
     caddy: {
         unixSocket: '/var/run/caddy/caddy.sock',
         adminPort: 2019
     },
-    theme: 'light' as 'light' | 'dark',
-    language: 'zh-CN' as 'zh-CN' | 'en-US',
-    reloadMode: 'auto' as 'auto' | 'manual'
+    theme: 'auto' as 'light' | 'dark' | 'auto',
+    language: 'zh-CN' as 'zh-CN' | 'en-US'
 })
+
+watch(() => settingsStore.settings, (newSettings) => {
+    localSettings.caddy.unixSocket = newSettings.caddy.unixSocket
+    localSettings.caddy.adminPort = newSettings.caddy.adminPort
+    localSettings.theme = newSettings.theme
+    localSettings.language = newSettings.language
+}, { immediate: true, deep: true })
 
 const loadSettings = async () => {
     try {
         const data = await settingsAPI.get()
-        Object.assign(settings, {
+        Object.assign(localSettings, {
             caddy: {
                 unixSocket: data.caddy?.unixSocket || '/var/run/caddy/caddy.sock',
                 adminPort: data.caddy?.adminPort || 2019
             },
-            theme: data.theme || 'light',
-            language: data.language || 'zh-CN',
-            reloadMode: data.reloadMode || 'auto'
+            theme: data.theme || 'auto',
+            language: data.language || 'zh-CN'
         })
-        settingsStore.updateSettings(settings)
+        settingsStore.updateSettings(localSettings)
     } catch (error) {
         console.error('Failed to load settings from backend:', error)
     }
@@ -146,8 +141,8 @@ const loadSettings = async () => {
 
 const saveSettings = async () => {
     try {
-        await settingsAPI.save(settings)
-        settingsStore.updateSettings(settings)
+        await settingsAPI.save(localSettings)
+        settingsStore.updateSettings(localSettings)
         ElMessage.success('设置已保存')
     } catch (error) {
         ElMessage.error('保存设置失败')
@@ -183,15 +178,6 @@ const checkCaddyStatus = async () => {
     }
 }
 
-const reloadCaddy = async () => {
-    try {
-        await settingsAPI.reloadCaddy()
-        ElMessage.success('Caddy2 配置重载成功')
-    } catch (error) {
-        ElMessage.error('配置重载失败')
-    }
-}
-
 onMounted(() => {
     loadSettings()
     checkCaddyStatus()
@@ -200,33 +186,13 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .settings-container {
-    padding: 20px;
-}
-
-.settings-tabs {
-    min-height: 500px;
-
-    :deep(.el-tab-pane) {
-        padding-left: 20px;
-    }
-}
-
-.settings-form {
-    max-width: 600px;
-    margin-top: 20px;
-}
-
-.form-tip {
-    font-size: 12px;
-    color: #909399;
-    margin-top: 5px;
-    line-height: 1.4;
+    padding: 24px;
 }
 
 .settings-footer {
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-subtle);
     display: flex;
     gap: 15px;
 }
@@ -236,23 +202,27 @@ onMounted(() => {
 
     .about-header {
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
 
         h2 {
             margin: 0 0 10px;
-            color: #303133;
+            color: var(--text-primary);
+            font-size: 24px;
         }
 
         .version {
-            color: #909399;
+            font-family: var(--font-mono);
+            color: var(--el-color-primary);
+            font-size: 14px;
             margin: 0;
         }
     }
 
     .description {
         text-align: center;
-        color: #606266;
+        color: var(--text-secondary);
         margin-bottom: 30px;
+        line-height: 1.6;
     }
 }
 </style>

@@ -268,7 +268,7 @@ onUnmounted(() => {
 
 <style scoped lang="scss">
 .dashboard-container {
-    animation: fadeIn 0.4s ease-out;
+    padding: 24px;
 }
 
 .dashboard-header {
@@ -309,9 +309,11 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     gap: 20px;
-    position: relative;
-    overflow: hidden;
-    animation: slideUp 0.5s ease-out backwards;
+    transition: border-color 0.2s;
+
+    &:hover {
+        border-color: var(--border-active);
+    }
 
     .stat-icon {
         width: 56px;
@@ -320,7 +322,6 @@ onUnmounted(() => {
         display: flex;
         align-items: center;
         justify-content: center;
-        position: relative;
 
         &.cyan {
             background: rgba(0, 212, 255, 0.1);
@@ -344,9 +345,6 @@ onUnmounted(() => {
     }
 
     .stat-info {
-        position: relative;
-        z-index: 1;
-
         .stat-value {
             font-size: 32px;
             font-weight: 700;
@@ -359,15 +357,6 @@ onUnmounted(() => {
             font-size: 13px;
             color: var(--text-secondary);
         }
-    }
-
-    .stat-glow {
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(circle, rgba(0, 212, 255, 0.05) 0%, transparent 70%);
     }
 }
 
@@ -441,7 +430,8 @@ onUnmounted(() => {
             gap: 12px;
         }
 
-        .site-type, .site-status {
+        .site-type,
+        .site-status {
             font-family: var(--font-mono);
             font-size: 11px;
             padding: 3px 8px;
@@ -527,7 +517,6 @@ onUnmounted(() => {
         &.running {
             border-color: var(--accent-cyan);
             box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-            animation: pulse 2s ease-in-out infinite;
 
             .ring-dot {
                 width: 16px;
@@ -652,31 +641,6 @@ onUnmounted(() => {
         border-color: var(--accent-cyan);
         color: var(--accent-cyan);
         background: var(--bg-hover);
-    }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes pulse {
-    0%, 100% {
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
     }
 }
 </style>
