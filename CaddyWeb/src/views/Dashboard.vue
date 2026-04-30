@@ -144,7 +144,7 @@ const stats = shallowRef({
     sslCerts: 0
 })
 
-const caddyStatus = shallowRef<'running' | 'checking'>('checking')
+const caddyStatus = shallowRef<'running' | 'checking' | 'stopped'>('checking')
 const caddyVersion = shallowRef('')
 
 const caddyStatusText = computed(() =>
@@ -170,11 +170,12 @@ const loadStats = async () => {
         const apps = config.apps || {}
         const httpApps = apps.http || {}
         const servers = httpApps.servers || {}
+        const tlsAutomation = apps.tls?.automation
 
         let siteCount = 0
         let proxyCount = 0
 
-        Object.entries(servers).forEach(([key, server]: [string, any]) => {
+        Object.entries(servers).forEach(([_, server]: [string, any]) => {
             siteCount++
             const routes = server.routes || []
             routes.forEach((route: any) => {
@@ -190,7 +191,7 @@ const loadStats = async () => {
         stats.value.totalSites = siteCount
         stats.value.activeSites = siteCount
         stats.value.totalProxies = proxyCount
-        stats.value.sslCerts = Object.keys(httpApps.tls || {}).length || 0
+        stats.value.sslCerts = tlsAutomation?.policies?.length || 0
     } catch (error) {
         console.error('Failed to load stats:', error)
     }
@@ -241,8 +242,8 @@ onMounted(() => {
 
     eventSource.addEventListener('caddy_status', (event) => {
         try {
-            const data = JSON.parse(event.data)
-            caddyStatus.value = data.status
+            const data = JSON.parse(event.data) as { status?: string; version?: string }
+            caddyStatus.value = (data.status === 'running' ? 'running' : 'stopped') as typeof caddyStatus.value
             caddyVersion.value = data.version || ''
         } catch (error) {
             console.error('Failed to parse SSE data:', error)
