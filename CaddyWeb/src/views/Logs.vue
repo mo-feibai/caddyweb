@@ -113,6 +113,7 @@
 
 <script setup lang="ts">
 import type { HttpLogEntry } from '@/types'
+import { LOG_LEVELS } from '@/types'
 import { logsAPI } from '@/api'
 
 const loading = ref(false)
@@ -205,13 +206,12 @@ const clearLogs = () => {
 
 const mockLogs = (): HttpLogEntry[] => {
     const methods = ['GET', 'POST', 'PUT', 'DELETE']
-    const levels: Array<'INFO' | 'WARN' | 'ERROR'> = ['INFO', 'INFO', 'INFO', 'WARN', 'ERROR']
     const paths = ['/', '/api/users', '/api/products', '/static/js/app.js', '/api/orders']
     const hosts = ['192.168.1.100', '10.0.0.50', '172.16.0.25']
 
     return Array.from({ length: 50 }, (_, i) => ({
         timestamp: new Date(Date.now() - i * 60000).toISOString(),
-        level: levels[Math.floor(Math.random() * levels.length)],
+        level: LOG_LEVELS[Math.floor(Math.random() * LOG_LEVELS.length)],
         host: hosts[Math.floor(Math.random() * hosts.length)],
         method: methods[Math.floor(Math.random() * methods.length)],
         path: paths[Math.floor(Math.random() * paths.length)],

@@ -1,5 +1,13 @@
 import axios, { AxiosInstance } from 'axios'
 import { useSettingsStore } from '@/stores/settings'
+import type {
+  SiteType,
+  DeployedMode,
+  Theme,
+  Language,
+  CaddyStatus as CaddyStatusValue,
+  LogLevel,
+} from '@/types'
 
 interface ApiResponse<T = unknown> {
   code: number
@@ -73,7 +81,7 @@ interface Domain {
 interface Site {
   name: string
   host: string
-  type: 'static' | 'reverse_proxy'
+  type: SiteType
   upstream?: string
   root?: string
   index_names?: string
@@ -84,7 +92,7 @@ interface Site {
 
 interface CreateSiteRequest {
   name: string
-  type: 'static' | 'reverse_proxy'
+  type: SiteType
   domain: string
   upstream?: string
   root?: string
@@ -94,7 +102,7 @@ interface CreateSiteRequest {
 
 interface UpdateSiteRequest {
   name?: string
-  type: 'static' | 'reverse_proxy'
+  type: SiteType
   domain?: string
   upstream?: string
   root?: string
@@ -103,12 +111,12 @@ interface UpdateSiteRequest {
 }
 
 interface AppSettings {
-  deployed_mode: 'local' | 'remote'
+  deployed_mode: DeployedMode
   api_base_url: string
   ws_base_url: string
   caddy: CaddySettings
-  theme: 'light' | 'dark' | 'auto'
-  language: 'zh-CN' | 'en-US'
+  theme: Theme
+  language: Language
   first_launch: boolean
 }
 
@@ -118,8 +126,8 @@ interface CaddySettings {
   admin_port: number
 }
 
-interface CaddyStatus {
-  status: 'running' | 'stopped'
+interface CaddyStatusResponse {
+  status: CaddyStatusValue
   version: string
 }
 
@@ -142,7 +150,7 @@ interface InitResult {
 
 interface LogEntry {
   timestamp: string
-  level: string
+  level: LogLevel
   message: string
 }
 
@@ -279,7 +287,7 @@ export const settingsAPI = {
       { installType }
     ),
 
-  getCaddyStatus: () => get<CaddyStatus>('/caddy/status'),
+  getCaddyStatus: () => get<CaddyStatusResponse>('/caddy/status'),
 
   checkCaddyInstallStatus: () => get<CaddyInstallStatus>('/caddy/check-install'),
 
@@ -328,7 +336,7 @@ export type {
   UpdateSiteRequest,
   AppSettings,
   CaddySettings,
-  CaddyStatus,
+  CaddyStatusResponse,
   CaddyInstallStatus,
   InitResult,
   LogEntry,

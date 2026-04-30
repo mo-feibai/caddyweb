@@ -205,19 +205,25 @@
 </template>
 
 <script setup lang="ts">
+import type {
+    CaddyInfo,
+    LocalConfig,
+    CheckStatus,
+    DetectStatus,
+    InitStatus
+} from '@/types'
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
-import type { CaddyInfo, LocalConfig } from '@/types'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()
 
 const currentStep = ref(0)
-const checkStatus = ref<'checking' | 'installed' | 'not_installed'>('checking')
+const checkStatus = ref<CheckStatus>('checking')
 const checkMessage = ref('正在检测...')
-const detectStatus = ref<'checking' | 'success' | 'failed'>('checking')
+const detectStatus = ref<DetectStatus>('checking')
 const detectMessage = ref('正在检测连接...')
-const initStatus = ref<'none' | 'checking' | 'success' | 'warning' | 'failed'>('none')
+const initStatus = ref<InitStatus>('none')
 const initMessage = ref('正在初始化...')
 const installing = ref(false)
 const installProgress = ref(0)

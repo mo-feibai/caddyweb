@@ -131,6 +131,7 @@
 </template>
 
 <script setup lang="ts">
+import type { CaddyStatusWithChecking } from '@/types'
 import { caddyAPI, settingsAPI, sseAPI } from '@/api'
 
 const router = useRouter()
@@ -144,7 +145,7 @@ const stats = shallowRef({
     sslCerts: 0
 })
 
-const caddyStatus = shallowRef<'running' | 'checking' | 'stopped'>('checking')
+const caddyStatus = shallowRef<CaddyStatusWithChecking>('checking')
 const caddyVersion = shallowRef('')
 
 const caddyStatusText = computed(() =>

@@ -258,14 +258,15 @@
 </template>
 
 <script setup lang="ts">
+import type { LocalSettings, Theme, Language, CaddyStatus } from '@/types'
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
-import type { LocalSettings } from '@/types'
+import { THEMES, LANGUAGES } from '@/types'
 
 const settingsStore = useSettingsStore()
 
 const activeTab = ref('basic')
-const caddyStatus = shallowRef<'running' | 'stopped'>('stopped')
+const caddyStatus = shallowRef<CaddyStatus>('stopped')
 const caddyVersion = shallowRef('未知')
 const checking = ref(false)
 const lastSaved = ref('')
@@ -277,16 +278,16 @@ const tabs = [
     { name: 'about', label: '关于', icon: 'info-filled' },
 ]
 
-const themeOptions: { value: 'light' | 'dark' | 'auto'; label: string }[] = [
-    { value: 'light', label: '浅色' },
-    { value: 'dark', label: '深色' },
-    { value: 'auto', label: '跟随系统' },
-]
+const themeOptions: { value: Theme; label: string }[] = THEMES.map(t => ({
+    value: t,
+    label: t === 'light' ? '浅色' : t === 'dark' ? '深色' : '跟随系统'
+}))
 
-const languageOptions: { value: 'zh-CN' | 'en-US'; label: string; flag: string }[] = [
-    { value: 'zh-CN', label: '简体中文', flag: '🇨🇳' },
-    { value: 'en-US', label: 'English', flag: '🇺🇸' },
-]
+const languageOptions: { value: Language; label: string; flag: string }[] = LANGUAGES.map(l => ({
+    value: l,
+    label: l === 'zh-CN' ? '简体中文' : 'English',
+    flag: l === 'zh-CN' ? '🇨🇳' : '🇺🇸'
+}))
 
 const stackItems = [
     { category: '前端框架', label: 'Vue 3.4 + TypeScript', icon: 'monitor' },

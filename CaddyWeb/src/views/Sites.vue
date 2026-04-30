@@ -130,7 +130,7 @@ import type { FormInstance } from 'element-plus'
 import type { Site, Domain } from '@/api'
 import { domainAPI, siteAPI } from '@/api'
 import { useClipboard } from '@vueuse/core'
-import type { SiteFormData } from '@/types'
+import type { SiteFormData, SiteType } from '@/types'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -222,7 +222,7 @@ const editSite = (site: Site) => {
     siteForm.domain = domainName
     siteForm.id = site.id
     siteForm.name = site.name
-    siteForm.type = site.type as 'static' | 'reverse_proxy'
+    siteForm.type = site.type as SiteType
     siteForm.upstream = site.upstream || ''
     siteForm.root = site.root || ''
     siteForm.indexNames = site.index_names || ''

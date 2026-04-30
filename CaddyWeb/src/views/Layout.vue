@@ -100,6 +100,7 @@
 </template>
 
 <script setup lang="ts">
+import type { CaddyStatus } from '@/types'
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
 
@@ -107,7 +108,7 @@ const route = useRoute()
 const router = useRouter()
 const settingsStore = useSettingsStore()
 
-const caddyStatus = shallowRef<'running' | 'stopped'>('stopped')
+const caddyStatus = shallowRef<CaddyStatus>('stopped')
 
 const activeMenu = computed(() => route.path)
 
