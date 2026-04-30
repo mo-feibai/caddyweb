@@ -74,6 +74,7 @@
 </template>
 
 <script setup lang="ts">
+import type { FormInstance } from 'element-plus'
 import { useSettingsStore } from '@/stores/settings'
 
 const router = useRouter()

@@ -195,61 +195,20 @@
 
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus'
+import type { Domain, Site, CreateSiteRequest, UpdateSiteRequest } from '@/api'
 import { domainAPI, settingsAPI, siteAPI } from '@/api'
-
-interface Domain {
-    name: string
-    wildcard: string
-    server_id: string
-    tls_enabled: boolean
-    id?: string
-}
-
-interface Site {
-    name: string
-    host: string
-    type: 'static' | 'reverse_proxy'
-    upstream: string
-    root: string
-    indexNames: string
-    health_check: boolean
-    id?: string
-    server_id?: string
-}
-
-const loading = ref(false)
-const saving = ref(false)
-const siteSaving = ref(false)
-
-const domains = shallowRef<Domain[]>([])
-const domainSites = shallowRef<Site[]>([])
-
-const dialogVisible = ref(false)
-const detailVisible = ref(false)
-const sitesVisible = ref(false)
-const siteDialogVisible = ref(false)
-
-const isEditingSite = ref(false)
-
-const currentDomain = ref<Domain | null>(null)
-const currentSite = ref<Site | null>(null)
-
-const formRef = ref<FormInstance>()
-const siteFormRef = ref<FormInstance>()
 
 interface ServerInfo {
     id: string
     listen: string[]
 }
 
-const servers = shallowRef<ServerInfo[]>([])
-
-const domainForm = reactive({
-    name: '',
-    server_id: '',
-    tls_enabled: true,
-    id: ''
-})
+interface DomainFormData {
+    name: string
+    server_id: string
+    tls_enabled: boolean
+    id: string
+}
 
 interface SiteFormData {
     name: string
@@ -260,6 +219,33 @@ interface SiteFormData {
     indexNames: string
     health_check: boolean
 }
+
+const loading = ref(false)
+const saving = ref(false)
+const siteSaving = ref(false)
+
+const domains = ref<Domain[]>([])
+const domainSites = ref<Site[]>([])
+const servers = ref<ServerInfo[]>([])
+
+const dialogVisible = ref(false)
+const detailVisible = ref(false)
+const sitesVisible = ref(false)
+const siteDialogVisible = ref(false)
+
+const isEditingSite = ref(false)
+
+const currentDomain = ref<Domain | null>(null)
+
+const formRef = ref<FormInstance>()
+const siteFormRef = ref<FormInstance>()
+
+const domainForm = reactive<DomainFormData>({
+    name: '',
+    server_id: '',
+    tls_enabled: true,
+    id: ''
+})
 
 const siteForm = reactive<SiteFormData>({
     name: '',
@@ -300,8 +286,8 @@ const loadDomains = async () => {
     try {
         const data = await domainAPI.list()
         domains.value = data || []
-    } catch (error: any) {
-        ElMessage.error('加载域名失败: ' + error.message)
+    } catch (error) {
+        ElMessage.error('加载域名失败')
     } finally {
         loading.value = false
     }
@@ -309,9 +295,9 @@ const loadDomains = async () => {
 
 const loadServers = async () => {
     try {
-        const data: any = await settingsAPI.getServers()
+        const data = await settingsAPI.getServers()
         servers.value = data || []
-    } catch (error: any) {
+    } catch (error) {
         console.error('加载服务器失败:', error)
     }
 }
@@ -330,23 +316,23 @@ const submitDomain = async () => {
         await formRef.value?.validate()
         saving.value = true
 
-        const data: any = {
+        const payload: { name: string; server_id: string; tls: boolean; id?: string } = {
             name: domainForm.name,
             server_id: domainForm.server_id,
             tls: domainForm.tls_enabled
         }
         if (domainForm.id) {
-            data.id = domainForm.id
+            payload.id = domainForm.id
         }
 
-        await domainAPI.create(data)
+        await domainAPI.create(payload)
         ElMessage.success('域名创建成功')
 
         dialogVisible.value = false
         loadDomains()
-    } catch (error: any) {
+    } catch (error) {
         if (error !== false) {
-            ElMessage.error('创建失败: ' + error.message)
+            ElMessage.error('创建失败')
         }
     } finally {
         saving.value = false
@@ -360,17 +346,17 @@ const deleteDomain = async (domain: Domain) => {
             '删除确认',
             { type: 'warning' }
         )
-        await domainAPI.delete(domain.server_id, domain.id!)
+        await domainAPI.delete(domain.server_id, domain.id)
         ElMessage.success('域名已删除')
         loadDomains()
-    } catch (error: any) {
+    } catch (error) {
         if (error !== 'cancel') {
-            if (error?.response?.data?.message?.includes('sub-sites')) {
+            if ((error as { response?: { data?: { message?: string } } })?.response?.data?.message?.includes('sub-sites')) {
                 ElMessageBox.alert('无法删除域名：该域名下存在子站点，请先删除所有子站点', '删除失败', {
                     type: 'warning'
                 })
             } else {
-                ElMessage.error('删除失败: ' + (error?.response?.data?.error || error.message))
+                ElMessage.error('删除失败')
             }
         }
     }
@@ -386,10 +372,10 @@ const viewDomainSites = async (domain: Domain) => {
     loading.value = true
     sitesVisible.value = true
     try {
-        const data = await domainAPI.getSites(domain.id!)
+        const data = await domainAPI.getSites(domain.id)
         domainSites.value = data || []
-    } catch (error: any) {
-        ElMessage.error('加载子站点失败: ' + error.message)
+    } catch (error) {
+        ElMessage.error('加载子站点失败')
     } finally {
         loading.value = false
     }
@@ -409,13 +395,12 @@ const showAddSiteDialog = () => {
 
 const editSite = (site: Site) => {
     isEditingSite.value = true
-    currentSite.value = site
     siteForm.name = site.name
-    siteForm.id = site.id || ''
-    siteForm.type = site.type as 'static' | 'reverse_proxy'
-    siteForm.upstream = site.upstream
-    siteForm.root = site.root
-    siteForm.indexNames = site.indexNames
+    siteForm.id = site.id
+    siteForm.type = site.type
+    siteForm.upstream = site.upstream || ''
+    siteForm.root = site.root || ''
+    siteForm.indexNames = site.index_names || ''
     siteForm.health_check = site.health_check
     siteDialogVisible.value = true
 }
@@ -425,32 +410,36 @@ const submitSite = async () => {
         await siteFormRef.value?.validate()
         siteSaving.value = true
 
-        const data: any = {
-            name: siteForm.name,
-            type: siteForm.type,
-            upstream: siteForm.upstream,
-            root: siteForm.root,
-            indexNames: siteForm.indexNames,
-            health_check: siteForm.health_check,
-            domain: currentDomain.value.name
-        }
-        if (siteForm.id) {
-            data.id = siteForm.id
-        }
-
         if (isEditingSite.value && currentDomain.value) {
-            await siteAPI.update(siteForm.id, data)
+            const payload: UpdateSiteRequest = {
+                name: siteForm.name,
+                type: siteForm.type,
+                upstream: siteForm.upstream,
+                root: siteForm.root,
+                index_names: siteForm.indexNames,
+                health_check: siteForm.health_check
+            }
+            await siteAPI.update(siteForm.id, payload)
             ElMessage.success('子站点更新成功')
         } else if (currentDomain.value) {
-            await siteAPI.create(currentDomain.value.id, data)
+            const payload: CreateSiteRequest = {
+                name: siteForm.name,
+                type: siteForm.type,
+                upstream: siteForm.upstream,
+                root: siteForm.root,
+                index_names: siteForm.indexNames,
+                health_check: siteForm.health_check,
+                domain: currentDomain.value.name
+            }
+            await siteAPI.create(currentDomain.value.id, payload)
             ElMessage.success('子站点创建成功')
         }
 
         siteDialogVisible.value = false
         viewDomainSites(currentDomain.value!)
-    } catch (error: any) {
+    } catch (error) {
         if (error !== false) {
-            ElMessage.error((isEditingSite.value ? '更新' : '创建') + '失败: ' + error.message)
+            ElMessage.error((isEditingSite.value ? '更新' : '创建') + '失败')
         }
     } finally {
         siteSaving.value = false
@@ -458,7 +447,6 @@ const submitSite = async () => {
 }
 
 const deleteSite = async (site: Site) => {
-
     if (!site.id) return
 
     try {
@@ -470,9 +458,9 @@ const deleteSite = async (site: Site) => {
         await siteAPI.delete(currentDomain.value!.id, site.id)
         ElMessage.success('子站点已删除')
         viewDomainSites(currentDomain.value!)
-    } catch (error: any) {
+    } catch (error) {
         if (error !== 'cancel') {
-            ElMessage.error('删除失败: ' + error.message)
+            ElMessage.error('删除失败')
         }
     }
 }

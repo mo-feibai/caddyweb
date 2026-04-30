@@ -276,13 +276,13 @@ const tabs = [
     { name: 'about', label: '关于', icon: 'info-filled' },
 ]
 
-const themeOptions = [
+const themeOptions: { value: 'light' | 'dark' | 'auto'; label: string }[] = [
     { value: 'light', label: '浅色' },
     { value: 'dark', label: '深色' },
     { value: 'auto', label: '跟随系统' },
 ]
 
-const languageOptions = [
+const languageOptions: { value: 'zh-CN' | 'en-US'; label: string; flag: string }[] = [
     { value: 'zh-CN', label: '简体中文', flag: '🇨🇳' },
     { value: 'en-US', label: 'English', flag: '🇺🇸' },
 ]
@@ -324,13 +324,13 @@ const loadSettings = async () => {
         const data = await settingsAPI.get()
         Object.assign(localSettings, {
             caddy: {
-                unixSocket: data.caddy?.unixSocket || '/var/run/caddy/caddy.sock',
-                adminPort: data.caddy?.adminPort || 2019
+                unixSocket: data.caddy?.unix_socket || '/var/run/caddy/caddy.sock',
+                adminPort: data.caddy?.admin_port || 2019
             },
             theme: data.theme || 'auto',
             language: data.language || 'zh-CN'
         })
-        settingsStore.updateSettings(localSettings)
+        settingsStore.updateSettings(localSettings as unknown as Partial<typeof settingsStore.settings>)
     } catch (error) {
         console.error('Failed to load settings from backend:', error)
     }
@@ -338,8 +338,21 @@ const loadSettings = async () => {
 
 const saveSettings = async () => {
     try {
-        await settingsAPI.save(localSettings)
-        settingsStore.updateSettings(localSettings)
+        const apiData = {
+            deployed_mode: 'local' as const,
+            api_base_url: settingsStore.settings.apiBaseUrl,
+            ws_base_url: settingsStore.settings.wsBaseUrl,
+            caddy: {
+                api_url: settingsStore.settings.caddy.apiUrl,
+                unix_socket: localSettings.caddy.unixSocket,
+                admin_port: localSettings.caddy.adminPort
+            },
+            theme: localSettings.theme,
+            language: localSettings.language,
+            first_launch: settingsStore.settings.firstLaunch
+        }
+        await settingsAPI.save(apiData)
+        settingsStore.updateSettings(localSettings as unknown as Partial<typeof settingsStore.settings>)
         ElMessage.success('设置已保存')
         lastSaved.value = '刚刚'
         setTimeout(() => { lastSaved.value = '' }, 3000)
@@ -350,7 +363,6 @@ const saveSettings = async () => {
 
 const resetSettings = async () => {
     try {
-        await settingsAPI.reset?.()
         settingsStore.resetSettings()
         loadSettings()
         ElMessage.info('设置已重置')
@@ -372,9 +384,9 @@ const checkCaddyStatus = async () => {
         } else {
             caddyStatus.value = 'stopped'
             caddyVersion.value = '未知'
-            ElMessage.warning(response.message || 'Caddy2 未运行')
+            ElMessage.warning('Caddy2 未运行')
         }
-    } catch (error: any) {
+    } catch {
         caddyStatus.value = 'stopped'
         caddyVersion.value = '未知'
         ElMessage.error('无法连接到 Caddy2')

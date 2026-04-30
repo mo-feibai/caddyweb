@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { logsAPI } from '@/api'
 
-interface LogEntry {
+interface HttpLogEntry {
     timestamp: string
     level: 'INFO' | 'WARN' | 'ERROR'
     host: string
@@ -131,7 +131,7 @@ const logLevel = ref('all')
 const searchKeyword = ref('')
 const currentPage = ref(1)
 const pageSize = ref(100)
-const logs = shallowRef<LogEntry[]>([])
+const logs = shallowRef<HttpLogEntry[]>([])
 
 const stats = computed(() => {
     const total = logs.value.length
@@ -199,10 +199,10 @@ const getStatusClass = (status: number) => {
 const loadLogs = async () => {
     loading.value = true
     try {
-        const response = await logsAPI.get({ limit: pageSize.value })
-        logs.value = response.logs || mockLogs()
-    } catch (error: any) {
-        ElMessage.error('加载日志失败: ' + error.message)
+        const data = await logsAPI.get({ limit: pageSize.value })
+        logs.value = (data as unknown as HttpLogEntry[]) || mockLogs()
+    } catch {
+        ElMessage.error('加载日志失败')
         logs.value = mockLogs()
     } finally {
         loading.value = false
@@ -214,7 +214,7 @@ const clearLogs = () => {
     ElMessage.success('日志已清空')
 }
 
-const mockLogs = (): LogEntry[] => {
+const mockLogs = (): HttpLogEntry[] => {
     const methods = ['GET', 'POST', 'PUT', 'DELETE']
     const levels: Array<'INFO' | 'WARN' | 'ERROR'> = ['INFO', 'INFO', 'INFO', 'WARN', 'ERROR']
     const paths = ['/', '/api/users', '/api/products', '/static/js/app.js', '/api/orders']

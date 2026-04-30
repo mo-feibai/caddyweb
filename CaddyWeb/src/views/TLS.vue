@@ -234,6 +234,8 @@
 </template>
 
 <script setup lang="ts">
+import type { FormInstance } from 'element-plus'
+import type { Domain } from '@/api'
 import { caddyAPI, domainAPI, siteAPI } from '@/api'
 import api from '@/api'
 
@@ -247,12 +249,6 @@ interface Certificate {
   pem?: string
 }
 
-interface DomainItem {
-  name: string
-  wildcard?: boolean
-  server_id?: string
-}
-
 interface SiteItem {
   id: string
   name: string
@@ -264,9 +260,9 @@ const saving = ref(false)
 const showAddDialog = ref(false)
 const showDetailDialog = ref(false)
 const selectedCert = ref<Certificate | null>(null)
-const certificates = shallowRef<Certificate[]>([])
-const domainList = shallowRef<DomainItem[]>([])
-const siteList = shallowRef<SiteItem[]>([])
+const certificates = ref<Certificate[]>([])
+const domainList = ref<Domain[]>([])
+const siteList = ref<SiteItem[]>([])
 
 const formRef = ref<FormInstance>()
 
@@ -322,7 +318,7 @@ const loadCertificates = async () => {
     const tls = config.apps?.http?.servers || {}
 
     const certList: Certificate[] = []
-    Object.entries(tls).forEach(([serverName, server]: [string, any]) => {
+    Object.entries(tls).forEach(([_, server]) => {
       const routes = server.routes || []
       routes.forEach((route: any) => {
         const match = route.match || []
@@ -345,8 +341,8 @@ const loadCertificates = async () => {
     })
 
     certificates.value = certList
-  } catch (error: any) {
-    ElMessage.error('加载证书失败: ' + error.message)
+  } catch {
+    ElMessage.error('加载证书失败')
   } finally {
     loading.value = false
   }
@@ -415,7 +411,19 @@ const saveCert = async () => {
     }
     saving.value = true
 
-    const requestData: any = {
+    interface CertRequestData {
+      authMethod: string
+      certId: string
+      domain?: string
+      certFile?: string
+      keyFile?: string
+      autoHTTPS?: boolean
+      targetType?: string
+      domainName?: string
+      siteId?: string
+    }
+
+    const requestData: CertRequestData = {
       authMethod: certForm.authMethod,
       certId: certForm.certId
     }
@@ -434,14 +442,14 @@ const saveCert = async () => {
       }
     }
 
-    const response = await api.post('/certs', requestData)
-    ElMessage.success(response.message || '证书配置已保存')
+    await api.post('/certs', requestData)
+    ElMessage.success('证书配置已保存')
 
     showAddDialog.value = false
     resetCertForm()
     loadCertificates()
-  } catch (error: any) {
-    ElMessage.error(error?.message || '保存失败')
+  } catch {
+    ElMessage.error('保存失败')
   } finally {
     saving.value = false
   }

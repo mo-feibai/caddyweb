@@ -329,8 +329,8 @@ const nextStep = async () => {
     if (currentStep.value === 1) {
         // 保存配置
         settingsStore.updateCaddySettings({
-            unixSocket: localConfig.value.unixSocket,
-            adminPort: localConfig.value.adminPort
+            unixSocket: localConfig.unixSocket,
+            adminPort: localConfig.adminPort
         })
     }
 

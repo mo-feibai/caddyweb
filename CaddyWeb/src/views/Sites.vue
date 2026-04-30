@@ -126,6 +126,7 @@
 </template>
 
 <script setup lang="ts">
+import type { FormInstance } from 'element-plus'
 import { domainAPI, siteAPI } from '@/api'
 import { useClipboard } from '@vueuse/core'
 
@@ -133,12 +134,12 @@ interface Site {
     name: string
     host: string
     type: 'static' | 'reverse_proxy'
-    upstream: string
-    root: string
-    indexNames: string
+    upstream?: string
+    root?: string
+    index_names?: string
     health_check: boolean
-    id?: string
-    server_id?: string
+    id: string
+    server_id: string
 }
 
 interface Domain {
@@ -146,6 +147,8 @@ interface Domain {
     wildcard: string
     listen: string[]
     tls_enabled: boolean
+    id: string
+    server_id: string
 }
 
 const loading = ref(false)
@@ -247,12 +250,12 @@ const editSite = (site: Site) => {
     const hostParts = site.host.split('.')
     const domainName = hostParts.slice(1).join('.')
     siteForm.domain = domainName
-    siteForm.id = site.id || ''
+    siteForm.id = site.id
     siteForm.name = site.name
     siteForm.type = site.type as 'static' | 'reverse_proxy'
-    siteForm.upstream = site.upstream
-    siteForm.root = site.root
-    siteForm.indexNames = site.indexNames
+    siteForm.upstream = site.upstream || ''
+    siteForm.root = site.root || ''
+    siteForm.indexNames = site.index_names || ''
     siteForm.health_check = site.health_check
     dialogVisible.value = true
 }
