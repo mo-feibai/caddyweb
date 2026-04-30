@@ -238,22 +238,7 @@ import type { FormInstance } from 'element-plus'
 import type { Domain } from '@/api'
 import { caddyAPI, domainAPI, siteAPI } from '@/api'
 import api from '@/api'
-
-interface Certificate {
-  domain: string
-  issuer: string
-  expiry: string
-  status: 'valid' | 'invalid' | 'expiring'
-  serialNumber?: string
-  fingerprint?: string
-  pem?: string
-}
-
-interface SiteItem {
-  id: string
-  name: string
-  domain?: string
-}
+import type { Certificate, SiteItem, CertFormData } from '@/types'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -265,18 +250,6 @@ const domainList = ref<Domain[]>([])
 const siteList = ref<SiteItem[]>([])
 
 const formRef = ref<FormInstance>()
-
-interface CertFormData {
-  authMethod: '' | 'auto' | 'file'
-  targetType: '' | 'domain' | 'site'
-  selectedDomain: string
-  selectedSite: string
-  domain: string
-  certFile: string
-  keyFile: string
-  autoHTTPS: boolean
-  certId: string
-}
 
 const certForm = reactive<CertFormData>({
   authMethod: '',

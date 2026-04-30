@@ -260,6 +260,7 @@
 <script setup lang="ts">
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
+import type { LocalSettings } from '@/types'
 
 const settingsStore = useSettingsStore()
 
@@ -293,15 +294,6 @@ const stackItems = [
     { category: '后端框架', label: 'Go + Gin', icon: 'box' },
     { category: '代理服务器', label: 'Caddy2', icon: 'connection' },
 ]
-
-interface LocalSettings {
-    caddy: {
-        unixSocket: string
-        adminPort: number
-    }
-    theme: 'light' | 'dark' | 'auto'
-    language: 'zh-CN' | 'en-US'
-}
 
 const localSettings = reactive<LocalSettings>({
     caddy: {

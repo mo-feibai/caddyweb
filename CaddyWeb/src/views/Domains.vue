@@ -197,28 +197,7 @@
 import type { FormInstance } from 'element-plus'
 import type { Domain, Site, CreateSiteRequest, UpdateSiteRequest } from '@/api'
 import { domainAPI, settingsAPI, siteAPI } from '@/api'
-
-interface ServerInfo {
-    id: string
-    listen: string[]
-}
-
-interface DomainFormData {
-    name: string
-    server_id: string
-    tls_enabled: boolean
-    id: string
-}
-
-interface SiteFormData {
-    name: string
-    type: 'static' | 'reverse_proxy'
-    id: string
-    upstream: string
-    root: string
-    indexNames: string
-    health_check: boolean
-}
+import type { ServerInfo, DomainFormData, SiteFormData } from '@/types'
 
 const loading = ref(false)
 const saving = ref(false)

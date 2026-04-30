@@ -112,19 +112,8 @@
 </template>
 
 <script setup lang="ts">
+import type { HttpLogEntry } from '@/types'
 import { logsAPI } from '@/api'
-
-interface HttpLogEntry {
-    timestamp: string
-    level: 'INFO' | 'WARN' | 'ERROR'
-    host: string
-    method: string
-    path: string
-    status: number
-    duration: number
-    size: number
-    message?: string
-}
 
 const loading = ref(false)
 const logLevel = ref('all')

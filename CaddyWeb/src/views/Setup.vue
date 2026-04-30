@@ -207,6 +207,7 @@
 <script setup lang="ts">
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
+import type { CaddyInfo, LocalConfig } from '@/types'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()
@@ -223,22 +224,11 @@ const installProgress = ref(0)
 const installMessage = ref('')
 const connectionType = ref('socket')
 
-interface CaddyInfo {
-    installed: boolean
-    running: boolean
-    version: string
-}
-
 const caddyInfo = shallowRef<CaddyInfo>({
     installed: false,
     running: false,
     version: ''
 })
-
-interface LocalConfig {
-    unixSocket: string
-    adminPort: number
-}
 
 const localConfig = reactive<LocalConfig>({
     unixSocket: '/var/run/caddy/caddy.sock',

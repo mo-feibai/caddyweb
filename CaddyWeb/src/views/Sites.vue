@@ -127,29 +127,10 @@
 
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus'
+import type { Site, Domain } from '@/api'
 import { domainAPI, siteAPI } from '@/api'
 import { useClipboard } from '@vueuse/core'
-
-interface Site {
-    name: string
-    host: string
-    type: 'static' | 'reverse_proxy'
-    upstream?: string
-    root?: string
-    index_names?: string
-    health_check: boolean
-    id: string
-    server_id: string
-}
-
-interface Domain {
-    name: string
-    wildcard: string
-    listen: string[]
-    tls_enabled: boolean
-    id: string
-    server_id: string
-}
+import type { SiteFormData } from '@/types'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -167,17 +148,6 @@ const selectedType = ref('')
 const dialogVisible = ref(false)
 const isEditing = ref(false)
 const formRef = ref<FormInstance>()
-
-interface SiteFormData {
-    domain: string
-    id: string
-    name: string
-    type: 'static' | 'reverse_proxy'
-    upstream: string
-    root: string
-    indexNames: string
-    health_check: boolean
-}
 
 const siteForm = reactive<SiteFormData>({
     domain: '',
