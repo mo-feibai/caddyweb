@@ -5,7 +5,7 @@
         <div class="card-header">
           <span>SSL 证书管理</span>
           <el-button type="primary" @click="openAddDialog">
-            <el-icon><Plus /></el-icon> 添加证书
+            <el-icon><i-ep-plus /></el-icon> 添加证书
           </el-button>
         </div>
       </template>
@@ -74,14 +74,14 @@
             @click="certForm.authMethod = 'auto'"
           >
             <div class="method-icon">
-              <el-icon><MagicStick /></el-icon>
+              <el-icon><i-ep-magic-stick /></el-icon>
             </div>
             <div class="method-content">
               <span class="method-title">自动管理</span>
               <span class="method-desc">使用 Let's Encrypt 自动获取证书</span>
             </div>
             <div class="method-check">
-              <el-icon><Check /></el-icon>
+              <el-icon><i-ep-check /></el-icon>
             </div>
           </button>
 
@@ -91,14 +91,14 @@
             @click="certForm.authMethod = 'file'"
           >
             <div class="method-icon file">
-              <el-icon><Folder /></el-icon>
+              <el-icon><i-ep-folder /></el-icon>
             </div>
             <div class="method-content">
               <span class="method-title">从文件加载</span>
               <span class="method-desc">使用已有的证书文件</span>
             </div>
             <div class="method-check">
-              <el-icon><Check /></el-icon>
+              <el-icon><i-ep-check /></el-icon>
             </div>
           </button>
         </div>
@@ -136,7 +136,7 @@
                 @click="certForm.targetType = 'domain'"
               >
                 <div class="target-icon">
-                  <el-icon><Link /></el-icon>
+                  <el-icon><i-ep-link /></el-icon>
                 </div>
                 <span class="target-name">域名</span>
                 <span class="target-desc">为域名添加证书</span>
@@ -148,7 +148,7 @@
                 @click="certForm.targetType = 'site'"
               >
                 <div class="target-icon">
-                  <el-icon><Document /></el-icon>
+                  <el-icon><i-ep-document /></el-icon>
                 </div>
                 <span class="target-name">站点</span>
                 <span class="target-desc">为站点添加证书</span>
@@ -234,11 +234,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
 import { caddyAPI, domainAPI, siteAPI } from '@/api'
 import api from '@/api'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, MagicStick, Folder, Link, Document, Check } from '@element-plus/icons-vue'
+
 
 interface Certificate {
   domain: string

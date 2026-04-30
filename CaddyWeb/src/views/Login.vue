@@ -32,7 +32,7 @@
               class="form-input"
             >
               <template #prefix>
-                <el-icon class="input-icon"><User /></el-icon>
+                <el-icon class="input-icon"><i-ep-user /></el-icon>
               </template>
             </el-input>
           </div>
@@ -48,7 +48,7 @@
               @keyup.enter="handleLogin"
             >
               <template #prefix>
-                <el-icon class="input-icon"><Lock /></el-icon>
+                <el-icon class="input-icon"><i-ep-lock /></el-icon>
               </template>
             </el-input>
           </div>
@@ -56,8 +56,8 @@
           <button type="button" class="login-btn" :class="{ loading }" :disabled="loading" @click="handleLogin">
             <span class="btn-text">{{ loading ? '登录中...' : '登录' }}</span>
             <span class="btn-icon">
-              <el-icon v-if="!loading"><ArrowRight /></el-icon>
-              <el-icon v-else class="spin"><Loading /></el-icon>
+              <el-icon v-if="!loading"><i-ep-arrow-right /></el-icon>
+              <el-icon v-else class="spin"><i-ep-loading /></el-icon>
             </span>
           </button>
         </el-form>
@@ -74,11 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/stores/settings'
-import { ElMessage } from 'element-plus'
-import { User, Lock, ArrowRight, Loading } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()

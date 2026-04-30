@@ -14,12 +14,12 @@
                         </el-select>
                         <el-button @click="loadLogs" :loading="loading">
                             <el-icon>
-                                <Refresh />
+                                <i-ep-refresh />
                             </el-icon> 刷新
                         </el-button>
                         <el-button @click="clearLogs">
                             <el-icon>
-                                <Delete />
+                                <i-ep-delete />
                             </el-icon> 清空
                         </el-button>
                     </div>
@@ -58,7 +58,7 @@
             <el-input v-model="searchKeyword" placeholder="搜索日志内容..." style="margin: 15px 0" clearable>
                 <template #prefix>
                     <el-icon>
-                        <Search />
+                        <i-ep-search />
                     </el-icon>
                 </template>
             </el-input>
@@ -112,10 +112,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
 import { logsAPI } from '@/api'
-import { ElMessage } from 'element-plus'
-import { Refresh, Delete, Search } from '@element-plus/icons-vue'
 
 interface LogEntry {
     timestamp: string

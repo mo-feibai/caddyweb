@@ -16,10 +16,10 @@
                     </div>
                     <div class="header-right">
                         <el-button type="primary" @click="showAddDialog">
-                            <el-icon><Plus /></el-icon> 添加子站点
+                            <el-icon><i-ep-plus /></el-icon> 添加子站点
                         </el-button>
                         <el-button type="danger" @click="batchDeleteSites" :disabled="selectedSites.length === 0">
-                            <el-icon><Delete /></el-icon> 批量删除
+                            <el-icon><i-ep-delete /></el-icon> 批量删除
                         </el-button>
                     </div>
                 </div>
@@ -44,10 +44,10 @@
                 <el-table-column prop="health_check" label="健康检查" width="100" align="center">
                     <template #default="{ row }">
                         <el-icon v-if="row.health_check" color="#67C23A">
-                            <Check />
+                            <i-ep-check />
                         </el-icon>
                         <el-icon v-else color="#909399">
-                            <Close />
+                            <i-ep-close />
                         </el-icon>
                     </template>
                 </el-table-column>
@@ -112,8 +112,8 @@
                 <p class="confirm-text">请输入 <span class="delete-code" @click="copyDeleteCode">DELETE</span> 确认删除 {{ selectedSites.length }} 个子站点</p>
                 <el-input v-model="confirmInput" placeholder="请输入 DELETE" clearable>
                     <template #suffix>
-                        <el-icon v-if="confirmInput === 'DELETE'" color="#67C23A"><Check /></el-icon>
-                        <el-icon v-else-if="confirmInput && confirmInput !== 'DELETE'" color="#F56C6C"><Close /></el-icon>
+                        <el-icon v-if="confirmInput === 'DELETE'" color="#67C23A"><i-ep-check /></el-icon>
+                        <el-icon v-else-if="confirmInput && confirmInput !== 'DELETE'" color="#F56C6C"><i-ep-close /></el-icon>
                     </template>
                 </el-input>
             </div>
@@ -126,11 +126,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
 import { domainAPI, siteAPI } from '@/api'
 import { useClipboard } from '@vueuse/core'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, Close, Plus, Delete } from '@element-plus/icons-vue'
+
 
 interface Site {
     name: string

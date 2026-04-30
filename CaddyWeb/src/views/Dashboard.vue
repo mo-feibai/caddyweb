@@ -7,7 +7,7 @@
             </div>
             <div class="header-actions">
                 <button class="action-btn" @click="reloadCaddy">
-                    <el-icon><Refresh /></el-icon>
+                    <el-icon><i-ep-refresh /></el-icon>
                     <span>重载配置</span>
                 </button>
             </div>
@@ -16,7 +16,13 @@
         <div class="stats-grid">
             <div class="stat-card" v-for="(stat, index) in statsData" :key="stat.label" :style="{ animationDelay: `${index * 100}ms` }">
                 <div class="stat-icon" :class="stat.color">
-                    <el-icon :size="24"><component :is="stat.icon" /></el-icon>
+                    <el-icon :size="24">
+                        <i-ep-folder v-if="stat.label === '站点总数'" />
+                        <i-ep-circle-check v-else-if="stat.label === '运行中'" />
+                        <i-ep-connection v-else-if="stat.label === '代理数量'" />
+                        <i-ep-lock v-else-if="stat.label === 'SSL 证书'" />
+                        <i-ep-folder v-else />
+                    </el-icon>
                 </div>
                 <div class="stat-info">
                     <div class="stat-value">{{ stat.value }}</div>
@@ -30,11 +36,11 @@
             <div class="panel sites-panel">
                 <div class="panel-header">
                     <h2 class="panel-title">
-                        <el-icon><Folder /></el-icon>
+                        <el-icon><i-ep-folder /></el-icon>
                         <span>最近站点</span>
                     </h2>
                     <el-button type="primary" size="small" @click="$router.push('/web/sites/add')">
-                        <el-icon><Plus /></el-icon>
+                        <el-icon><i-ep-plus /></el-icon>
                         添加站点
                     </el-button>
                 </div>
@@ -50,10 +56,10 @@
                         </div>
                         <div class="site-actions">
                             <button class="icon-btn" @click="editSite(site)">
-                                <el-icon><Edit /></el-icon>
+                                <el-icon><i-ep-edit /></el-icon>
                             </button>
                             <button class="icon-btn danger" @click="deleteSite(site)">
-                                <el-icon><Delete /></el-icon>
+                                <el-icon><i-ep-delete /></el-icon>
                             </button>
                         </div>
                     </div>
@@ -64,7 +70,7 @@
                 <div class="panel status-panel">
                     <div class="panel-header">
                         <h2 class="panel-title">
-                            <el-icon><Monitor /></el-icon>
+                            <el-icon><i-ep-monitor /></el-icon>
                             <span>Caddy2 状态</span>
                         </h2>
                     </div>
@@ -82,11 +88,11 @@
 
                     <div class="status-actions">
                         <button class="status-btn" @click="reloadCaddy">
-                            <el-icon><Refresh /></el-icon>
+                            <el-icon><i-ep-refresh /></el-icon>
                             重载配置
                         </button>
                         <button class="status-btn" @click="$router.push('/web/logs')">
-                            <el-icon><Document /></el-icon>
+                            <el-icon><i-ep-document /></el-icon>
                             查看日志
                         </button>
                     </div>
@@ -95,26 +101,26 @@
                 <div class="panel quick-panel">
                     <div class="panel-header">
                         <h2 class="panel-title">
-                            <el-icon><Lightning /></el-icon>
+                            <el-icon><i-ep-lightning /></el-icon>
                             <span>快捷操作</span>
                         </h2>
                     </div>
 
                     <div class="quick-grid">
                         <button class="quick-btn" @click="$router.push('/web/tls')">
-                            <el-icon><Lock /></el-icon>
+                            <el-icon><i-ep-lock /></el-icon>
                             <span>SSL 证书</span>
                         </button>
                         <button class="quick-btn" @click="$router.push('/web/domains')">
-                            <el-icon><Link /></el-icon>
+                            <el-icon><i-ep-link /></el-icon>
                             <span>域名管理</span>
                         </button>
                         <button class="quick-btn" @click="$router.push('/web/settings')">
-                            <el-icon><Setting /></el-icon>
+                            <el-icon><i-ep-setting /></el-icon>
                             <span>系统设置</span>
                         </button>
                         <button class="quick-btn" @click="$router.push('/web/logs')">
-                            <el-icon><DataLine /></el-icon>
+                            <el-icon><i-ep-data-line /></el-icon>
                             <span>访问日志</span>
                         </button>
                     </div>
@@ -126,24 +132,6 @@
 
 <script setup lang="ts">
 import { caddyAPI, settingsAPI, sseAPI } from '@/api'
-import {
-    CircleCheck,
-    Connection,
-    DataLine,
-    Delete, Document,
-    Edit,
-    Folder,
-    Lightning,
-    Link,
-    Lock,
-    Monitor,
-    Plus,
-    Refresh,
-    Setting
-} from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
@@ -163,10 +151,10 @@ const caddyStatusText = computed(() =>
 )
 
 const statsData = computed(() => [
-    { label: '站点总数', value: stats.value.totalSites, icon: Folder, color: 'cyan' },
-    { label: '运行中', value: stats.value.activeSites, icon: CircleCheck, color: 'green' },
-    { label: '代理数量', value: stats.value.totalProxies, icon: Connection, color: 'blue' },
-    { label: 'SSL 证书', value: stats.value.sslCerts, icon: Lock, color: 'amber' }
+    { label: '站点总数', value: stats.value.totalSites, color: 'cyan' },
+    { label: '运行中', value: stats.value.activeSites, color: 'green' },
+    { label: '代理数量', value: stats.value.totalProxies, color: 'blue' },
+    { label: 'SSL 证书', value: stats.value.sslCerts, color: 'amber' }
 ])
 
 const recentSites = ref([

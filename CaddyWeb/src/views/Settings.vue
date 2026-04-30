@@ -5,7 +5,7 @@
 
         <div class="settings-header">
             <div class="header-icon">
-                <el-icon :size="28"><Setting /></el-icon>
+                <el-icon :size="28"><i-ep-setting /></el-icon>
             </div>
             <div class="header-text">
                 <h1 class="header-title">系统设置</h1>
@@ -24,7 +24,7 @@
                     :style="{ animationDelay: `${index * 60}ms` }"
                 >
                     <span class="nav-indicator"></span>
-                    <el-icon :size="18" class="nav-icon"><component :is="tab.icon" /></el-icon>
+                    <el-icon :size="18" class="nav-icon"><component :is="'i-ep-' + tab.icon.toLowerCase()" /></el-icon>
                     <span class="nav-label">{{ tab.label }}</span>
                     <span class="nav-accent"></span>
                 </button>
@@ -35,7 +35,7 @@
                     <section v-if="activeTab === 'basic'" key="basic" class="settings-section">
                         <div class="section-header">
                             <div class="section-icon">
-                                <el-icon><Connection /></el-icon>
+                                <el-icon><i-ep-connection /></el-icon>
                             </div>
                             <div class="section-titles">
                                 <h2 class="section-title">连接配置</h2>
@@ -51,7 +51,7 @@
                                         Unix Socket
                                     </label>
                                     <div class="input-wrapper">
-                                        <el-icon class="input-prefix"><Document /></el-icon>
+                                        <el-icon class="input-prefix"><i-ep-document /></el-icon>
                                         <el-input
                                             v-model="localSettings.caddy.unixSocket"
                                             placeholder="/var/run/caddy/caddy.sock"
@@ -69,7 +69,7 @@
                                         Admin 端口
                                     </label>
                                     <div class="input-wrapper">
-                                        <el-icon class="input-prefix"><Connection /></el-icon>
+                                        <el-icon class="input-prefix"><i-ep-connection /></el-icon>
                                         <el-input-number
                                             v-model="localSettings.caddy.adminPort"
                                             :min="1"
@@ -87,7 +87,7 @@
                     <section v-else-if="activeTab === 'ui'" key="ui" class="settings-section">
                         <div class="section-header">
                             <div class="section-icon">
-                                <el-icon><MagicStick /></el-icon>
+                                <el-icon><i-ep-magic-stick /></el-icon>
                             </div>
                             <div class="section-titles">
                                 <h2 class="section-title">外观</h2>
@@ -116,7 +116,7 @@
                                             </div>
                                             <span class="theme-name">{{ theme.label }}</span>
                                             <div class="theme-check">
-                                                <el-icon><Check /></el-icon>
+                                                <el-icon><i-ep-check /></el-icon>
                                             </div>
                                         </button>
                                     </div>
@@ -149,7 +149,7 @@
                     <section v-else-if="activeTab === 'caddy'" key="caddy" class="settings-section">
                         <div class="section-header">
                             <div class="section-icon caddy-icon">
-                                <el-icon><Box /></el-icon>
+                                <el-icon><i-ep-box /></el-icon>
                             </div>
                             <div class="section-titles">
                                 <h2 class="section-title">Caddy2 管理</h2>
@@ -180,7 +180,7 @@
                                         <span class="version-value">{{ caddyVersion }}</span>
                                     </div>
                                     <div class="status-uptime" v-if="caddyStatus === 'running'">
-                                        <el-icon><Timer /></el-icon>
+                                        <el-icon><i-ep-timer /></el-icon>
                                         <span>实时监控</span>
                                     </div>
                                 </div>
@@ -189,14 +189,14 @@
                             <div class="status-actions-row">
                                 <button class="action-card" @click="checkCaddyStatus" :class="{ loading: checking }">
                                     <div class="action-card-icon">
-                                        <el-icon><Refresh /></el-icon>
+                                        <el-icon><i-ep-refresh /></el-icon>
                                     </div>
                                     <div class="action-card-content">
                                         <span class="action-card-title">检测连接</span>
                                         <span class="action-card-desc">验证 Caddy2 连接状态</span>
                                     </div>
                                     <div class="action-card-arrow">
-                                        <el-icon><ArrowRight /></el-icon>
+                                        <el-icon><i-ep-arrow-right /></el-icon>
                                     </div>
                                 </button>
                             </div>
@@ -210,7 +210,7 @@
                                 <div class="logo-shape"></div>
                                 <div class="logo-shape"></div>
                                 <div class="logo-core">
-                                    <el-icon :size="36"><Box /></el-icon>
+                                    <el-icon :size="36"><i-ep-box /></el-icon>
                                 </div>
                             </div>
                             <h2 class="about-title">CaddyWeb</h2>
@@ -221,7 +221,7 @@
                         <div class="about-stack">
                             <div class="stack-item" v-for="(item, i) in stackItems" :key="item.label" :style="{ animationDelay: `${300 + i * 80}ms` }">
                                 <div class="stack-icon">
-                                    <el-icon><component :is="item.icon" /></el-icon>
+                                    <el-icon><component :is="'i-ep-' + item.icon.toLowerCase()" /></el-icon>
                                 </div>
                                 <div class="stack-info">
                                     <span class="stack-category">{{ item.category }}</span>
@@ -240,16 +240,16 @@
 
         <footer class="settings-footer">
             <div class="footer-saved" v-if="lastSaved">
-                <el-icon><Check /></el-icon>
+                <el-icon><i-ep-check /></el-icon>
                 <span>已保存 {{ lastSaved }}</span>
             </div>
             <div class="footer-actions">
                 <button class="btn-reset" @click="resetSettings">
-                    <el-icon><RefreshLeft /></el-icon>
+                    <el-icon><i-ep-refresh-left /></el-icon>
                     <span>重置</span>
                 </button>
                 <button class="btn-save" @click="saveSettings">
-                    <el-icon><Check /></el-icon>
+                    <el-icon><i-ep-check /></el-icon>
                     <span>保存设置</span>
                 </button>
             </div>
@@ -258,10 +258,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watch, computed } from 'vue'
+
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
-import { ElMessage } from 'element-plus'
 
 const settingsStore = useSettingsStore()
 
@@ -272,10 +271,10 @@ const checking = ref(false)
 const lastSaved = ref('')
 
 const tabs = [
-    { name: 'basic', label: '基础设置', icon: 'Connection' },
-    { name: 'ui', label: '界面设置', icon: 'MagicStick' },
-    { name: 'caddy', label: 'Caddy2 管理', icon: 'Box' },
-    { name: 'about', label: '关于', icon: 'InfoFilled' },
+    { name: 'basic', label: '基础设置', icon: 'connection' },
+    { name: 'ui', label: '界面设置', icon: 'magic-stick' },
+    { name: 'caddy', label: 'Caddy2 管理', icon: 'box' },
+    { name: 'about', label: '关于', icon: 'info-filled' },
 ]
 
 const themeOptions = [
@@ -290,10 +289,10 @@ const languageOptions = [
 ]
 
 const stackItems = [
-    { category: '前端框架', label: 'Vue 3.4 + TypeScript', icon: 'Monitor' },
-    { category: 'UI 组件', label: 'Element Plus', icon: 'Grid' },
-    { category: '后端框架', label: 'Go + Gin', icon: 'Box' },
-    { category: '代理服务器', label: 'Caddy2', icon: 'Connection' },
+    { category: '前端框架', label: 'Vue 3.4 + TypeScript', icon: 'monitor' },
+    { category: 'UI 组件', label: 'Element Plus', icon: 'grid' },
+    { category: '后端框架', label: 'Go + Gin', icon: 'box' },
+    { category: '代理服务器', label: 'Caddy2', icon: 'connection' },
 ]
 
 const localSettings = reactive({

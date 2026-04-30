@@ -5,11 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch, onMounted } from 'vue'
-import { ElConfigProvider } from 'element-plus'
+
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
-import { useSettingsStore } from '@/stores/settings'
 import { usePreferredDark } from '@vueuse/core'
+import { useSettingsStore } from '@/stores/settings'
 
 const settingsStore = useSettingsStore()
 const prefersDark = usePreferredDark()

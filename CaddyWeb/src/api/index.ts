@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
+
 import { useSettingsStore } from '@/stores/settings'
 
 const api = axios.create({

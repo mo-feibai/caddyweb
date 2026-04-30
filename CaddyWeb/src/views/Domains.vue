@@ -6,7 +6,7 @@
                     <span>域名管理</span>
                     <el-button type="primary" @click="showAddDialog">
                         <el-icon>
-                            <Plus />
+                            <i-ep-plus />
                         </el-icon> 添加域名
                     </el-button>
                 </div>
@@ -39,10 +39,10 @@
                 <el-table-column label="TLS" width="80" align="center">
                     <template #default="{ row }">
                         <el-icon v-if="row.tls_enabled" color="#67C23A">
-                            <Lock />
+                            <i-ep-lock />
                         </el-icon>
                         <el-icon v-else color="#909399">
-                            <Unlock />
+                            <i-ep-unlock />
                         </el-icon>
                     </template>
                 </el-table-column>
@@ -110,7 +110,7 @@
             <div class="sites-header">
                 <el-button type="primary" size="small" @click="showAddSiteDialog">
                     <el-icon>
-                        <Plus />
+                        <i-ep-plus />
                     </el-icon> 添加子站点
                 </el-button>
             </div>
@@ -195,9 +195,6 @@
 
 <script setup lang="ts">
 import { domainAPI, settingsAPI, siteAPI } from '@/api'
-import { Lock, Plus, Unlock } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { onMounted, reactive, ref } from 'vue'
 
 interface Domain {
     name: string

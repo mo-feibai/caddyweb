@@ -8,7 +8,6 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@element-plus/icons-vue": "^2.3.2",
         "@vueuse/core": "^14.2.1",
         "axios": "^1.15.1",
         "element-plus": "^2.13.7",
@@ -17,10 +16,15 @@
         "vue-router": "^5.0.4"
     },
     "devDependencies": {
+        "@iconify-json/ep": "^1.2.4",
+        "@iconify/vue": "^5.0.0",
         "@types/node": "^25.6.0",
         "@vitejs/plugin-vue": "^6.0.6",
         "sass": "^1.99.0",
         "typescript": "^6.0.3",
+        "unplugin-auto-import": "^21.0.0",
+        "unplugin-icons": "^23.0.1",
+        "unplugin-vue-components": "^32.0.0",
         "vite": "^8.0.9",
         "vue-tsc": "^3.2.7"
     }

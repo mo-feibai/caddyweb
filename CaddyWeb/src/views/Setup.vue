@@ -23,13 +23,13 @@
 
                     <div class="check-status">
                         <el-icon v-if="checkStatus === 'checking'" class="is-loading" :size="48">
-                            <Loading />
+                            <i-ep-loading />
                         </el-icon>
                         <el-icon v-else-if="checkStatus === 'installed'" :size="48" color="#67C23A">
-                            <CircleCheck />
+                            <i-ep-circle-check />
                         </el-icon>
                         <el-icon v-else :size="48" color="#F56C6C">
-                            <CircleClose />
+                            <i-ep-circle-close />
                         </el-icon>
                     </div>
 
@@ -115,13 +115,13 @@
 
                     <div class="detect-status">
                         <el-icon v-if="detectStatus === 'checking'" class="is-loading" :size="48">
-                            <Loading />
+                            <i-ep-loading />
                         </el-icon>
                         <el-icon v-else-if="detectStatus === 'success'" :size="48" color="#67C23A">
-                            <CircleCheck />
+                            <i-ep-circle-check />
                         </el-icon>
                         <el-icon v-else :size="48" color="#F56C6C">
-                            <CircleClose />
+                            <i-ep-circle-close />
                         </el-icon>
                     </div>
 
@@ -139,16 +139,16 @@
 
                     <div class="init-status">
                         <el-icon v-if="initStatus === 'checking'" class="is-loading" :size="48">
-                            <Loading />
+                            <i-ep-loading />
                         </el-icon>
                         <el-icon v-else-if="initStatus === 'success'" :size="48" color="#67C23A">
-                            <CircleCheck />
+                            <i-ep-circle-check />
                         </el-icon>
                         <el-icon v-else-if="initStatus === 'warning'" :size="48" color="#E6A23C">
-                            <Warning />
+                            <i-ep-warning />
                         </el-icon>
                         <el-icon v-else :size="48" color="#F56C6C">
-                            <CircleClose />
+                            <i-ep-circle-close />
                         </el-icon>
                     </div>
 
@@ -174,7 +174,7 @@
                 <div v-if="currentStep === 4" class="step-panel">
                     <div class="success-panel">
                         <el-icon :size="80" color="#67C23A">
-                            <CircleCheck />
+                            <i-ep-circle-check />
                         </el-icon>
                         <h3>设置完成！</h3>
                         <p>点击下方按钮进入管理界面</p>
@@ -205,12 +205,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
-import { Loading, CircleCheck, CircleClose, Warning } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const settingsStore = useSettingsStore()

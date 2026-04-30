@@ -17,30 +17,30 @@
 
             <el-menu :default-active="activeMenu" router class="sidebar-menu">
                 <el-menu-item index="/web/dashboard">
-                    <el-icon><DataAnalysis /></el-icon>
+                    <el-icon><i-ep-data-analysis /></el-icon>
                     <span>仪表盘</span>
                 </el-menu-item>
                 <el-menu-item index="/web/domains">
-                    <el-icon><Link /></el-icon>
+                    <el-icon><i-ep-link /></el-icon>
                     <span>域名管理</span>
                 </el-menu-item>
                 <el-menu-item index="/web/sites">
-                    <el-icon><Folder /></el-icon>
+                    <el-icon><i-ep-folder /></el-icon>
                     <span>子站点</span>
                 </el-menu-item>
                 <el-menu-item index="/web/tls">
-                    <el-icon><Lock /></el-icon>
+                    <el-icon><i-ep-lock /></el-icon>
                     <span>SSL 证书</span>
                 </el-menu-item>
                 <el-menu-item index="/web/logs">
-                    <el-icon><Document /></el-icon>
+                    <el-icon><i-ep-document /></el-icon>
                     <span>访问日志</span>
                 </el-menu-item>
 
                 <div class="menu-divider"></div>
 
                 <el-menu-item index="/web/settings">
-                    <el-icon><Setting /></el-icon>
+                    <el-icon><i-ep-setting /></el-icon>
                     <span>系统设置</span>
                 </el-menu-item>
             </el-menu>
@@ -73,17 +73,17 @@
                     <el-dropdown @command="handleCommand" trigger="click">
                         <button class="user-btn">
                             <div class="user-avatar">
-                                <el-icon><User /></el-icon>
+                                <el-icon><i-ep-user /></el-icon>
                             </div>
                         </button>
                         <template #dropdown>
                             <el-dropdown-menu>
                                 <el-dropdown-item command="settings">
-                                    <el-icon><Setting /></el-icon>
+                                    <el-icon><i-ep-setting /></el-icon>
                                     <span>设置</span>
                                 </el-dropdown-item>
                                 <el-dropdown-item command="logout" divided>
-                                    <el-icon><SwitchButton /></el-icon>
+                                    <el-icon><i-ep-switch-button /></el-icon>
                                     <span>退出</span>
                                 </el-dropdown-item>
                             </el-dropdown-menu>
@@ -100,15 +100,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
-import {
-    DataAnalysis, Folder, Lock, Document,
-    Setting, User, Link, SwitchButton
-} from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
