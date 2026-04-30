@@ -223,13 +223,24 @@ const installProgress = ref(0)
 const installMessage = ref('')
 const connectionType = ref('socket')
 
-const caddyInfo = ref({
+interface CaddyInfo {
+    installed: boolean
+    running: boolean
+    version: string
+}
+
+const caddyInfo = shallowRef<CaddyInfo>({
     installed: false,
     running: false,
     version: ''
 })
 
-const localConfig = ref({
+interface LocalConfig {
+    unixSocket: string
+    adminPort: number
+}
+
+const localConfig = reactive<LocalConfig>({
     unixSocket: '/var/run/caddy/caddy.sock',
     adminPort: 2019
 })

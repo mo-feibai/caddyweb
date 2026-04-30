@@ -131,7 +131,7 @@ const logLevel = ref('all')
 const searchKeyword = ref('')
 const currentPage = ref(1)
 const pageSize = ref(100)
-const logs = ref<LogEntry[]>([])
+const logs = shallowRef<LogEntry[]>([])
 
 const stats = computed(() => {
     const total = logs.value.length

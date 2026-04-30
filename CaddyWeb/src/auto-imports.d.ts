@@ -7,8 +7,10 @@
 export {}
 declare global {
   const EffectScope: typeof import('vue').EffectScope
-  const ElMessage: typeof import('element-plus/es').ElMessage
-  const ElMessageBox: typeof import('element-plus/es').ElMessageBox
+  const ElMessage: typeof import('element-plus').ElMessage
+  const ElMessageBox: typeof import('element-plus').ElMessageBox
+  const FormInstance: typeof import('element-plus').FormInstance
+  const FormRules: typeof import('element-plus').FormRules
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
   const autoResetRef: typeof import('@vueuse/core').autoResetRef

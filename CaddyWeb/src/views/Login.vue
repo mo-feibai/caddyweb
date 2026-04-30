@@ -79,10 +79,10 @@ import { useSettingsStore } from '@/stores/settings'
 const router = useRouter()
 const settingsStore = useSettingsStore()
 
-const formRef = ref()
+const formRef = ref<FormInstance>()
 const loading = ref(false)
 
-const loginForm = ref({
+const loginForm = reactive({
   username: 'admin',
   password: 'admin'
 })
@@ -99,7 +99,7 @@ const handleLogin = async () => {
 
     await new Promise(resolve => setTimeout(resolve, 800))
 
-    if (loginForm.value.username === 'admin' && loginForm.value.password === 'admin') {
+    if (loginForm.username === 'admin' && loginForm.password === 'admin') {
       ElMessage.success('登录成功')
       router.push('/web/dashboard')
     } else {

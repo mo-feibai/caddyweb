@@ -194,6 +194,7 @@
 </template>
 
 <script setup lang="ts">
+import type { FormInstance } from 'element-plus'
 import { domainAPI, settingsAPI, siteAPI } from '@/api'
 
 interface Domain {
@@ -207,7 +208,7 @@ interface Domain {
 interface Site {
     name: string
     host: string
-    type: string
+    type: 'static' | 'reverse_proxy'
     upstream: string
     root: string
     indexNames: string
@@ -220,8 +221,8 @@ const loading = ref(false)
 const saving = ref(false)
 const siteSaving = ref(false)
 
-const domains = ref<Domain[]>([])
-const domainSites = ref<Site[]>([])
+const domains = shallowRef<Domain[]>([])
+const domainSites = shallowRef<Site[]>([])
 
 const dialogVisible = ref(false)
 const detailVisible = ref(false)
@@ -233,15 +234,15 @@ const isEditingSite = ref(false)
 const currentDomain = ref<Domain | null>(null)
 const currentSite = ref<Site | null>(null)
 
-const formRef = ref()
-const siteFormRef = ref()
+const formRef = ref<FormInstance>()
+const siteFormRef = ref<FormInstance>()
 
 interface ServerInfo {
     id: string
-    listen: string[] 
+    listen: string[]
 }
 
-const servers = ref<ServerInfo[]>([])
+const servers = shallowRef<ServerInfo[]>([])
 
 const domainForm = reactive({
     name: '',
@@ -250,9 +251,19 @@ const domainForm = reactive({
     id: ''
 })
 
-const siteForm = reactive({
+interface SiteFormData {
+    name: string
+    type: 'static' | 'reverse_proxy'
+    id: string
+    upstream: string
+    root: string
+    indexNames: string
+    health_check: boolean
+}
+
+const siteForm = reactive<SiteFormData>({
     name: '',
-    type: 'reverse_proxy' as 'static' | 'reverse_proxy',
+    type: 'reverse_proxy',
     id: '',
     upstream: '',
     root: '/var/www/html',

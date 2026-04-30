@@ -11,7 +11,14 @@ export default defineConfig({
   plugins: [
     vue(),
     AutoImport({
-      imports: ["vue", "vue-router", "pinia", "@vueuse/core"],
+      imports: ["vue", "vue-router", "pinia", "@vueuse/core", {
+        'element-plus': [
+          'ElMessage',
+          'ElMessageBox',
+          'FormInstance',   // 👈 加这里
+          'FormRules'
+        ]
+      }],
       resolvers: [
         ElementPlusResolver(),
         IconsResolver({}),
@@ -21,7 +28,7 @@ export default defineConfig({
     Components({
       resolvers: [
         ElementPlusResolver({
-          importStyle: "sass",
+          importStyle: true,
         }),
         IconsResolver({
           enabledCollections: ["ep"],
@@ -36,7 +43,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src")
-    }
+    },
   },
   server: {
     port: 8080,

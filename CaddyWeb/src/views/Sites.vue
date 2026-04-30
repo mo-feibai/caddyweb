@@ -129,11 +129,10 @@
 import { domainAPI, siteAPI } from '@/api'
 import { useClipboard } from '@vueuse/core'
 
-
 interface Site {
     name: string
     host: string
-    type: string
+    type: 'static' | 'reverse_proxy'
     upstream: string
     root: string
     indexNames: string
@@ -152,25 +151,36 @@ interface Domain {
 const loading = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
-const selectedSites = ref<Site[]>([])
+const selectedSites = shallowRef<Site[]>([])
 const confirmDialogVisible = ref(false)
 const confirmInput = ref('')
 const { copy } = useClipboard({ legacy: true })
 
-const domains = ref<Domain[]>([])
-const sites = ref<Site[]>([])
+const domains = shallowRef<Domain[]>([])
+const sites = shallowRef<Site[]>([])
 const selectedDomain = ref('')
 const selectedType = ref('')
 
 const dialogVisible = ref(false)
 const isEditing = ref(false)
-const formRef = ref()
+const formRef = ref<FormInstance>()
 
-const siteForm = reactive({
+interface SiteFormData {
+    domain: string
+    id: string
+    name: string
+    type: 'static' | 'reverse_proxy'
+    upstream: string
+    root: string
+    indexNames: string
+    health_check: boolean
+}
+
+const siteForm = reactive<SiteFormData>({
     domain: '',
     id: '',
     name: '',
-    type: 'reverse_proxy' as 'static' | 'reverse_proxy',
+    type: 'reverse_proxy',
     upstream: '',
     root: '/var/www/html',
     indexNames: 'index.html',

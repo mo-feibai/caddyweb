@@ -237,7 +237,6 @@
 import { caddyAPI, domainAPI, siteAPI } from '@/api'
 import api from '@/api'
 
-
 interface Certificate {
   domain: string
   issuer: string
@@ -265,15 +264,27 @@ const saving = ref(false)
 const showAddDialog = ref(false)
 const showDetailDialog = ref(false)
 const selectedCert = ref<Certificate | null>(null)
-const certificates = ref<Certificate[]>([])
-const domainList = ref<DomainItem[]>([])
-const siteList = ref<SiteItem[]>([])
+const certificates = shallowRef<Certificate[]>([])
+const domainList = shallowRef<DomainItem[]>([])
+const siteList = shallowRef<SiteItem[]>([])
 
-const formRef = ref()
+const formRef = ref<FormInstance>()
 
-const certForm = reactive({
-  authMethod: '' as '' | 'auto' | 'file',
-  targetType: '' as '' | 'domain' | 'site',
+interface CertFormData {
+  authMethod: '' | 'auto' | 'file'
+  targetType: '' | 'domain' | 'site'
+  selectedDomain: string
+  selectedSite: string
+  domain: string
+  certFile: string
+  keyFile: string
+  autoHTTPS: boolean
+  certId: string
+}
+
+const certForm = reactive<CertFormData>({
+  authMethod: '',
+  targetType: '',
   selectedDomain: '',
   selectedSite: '',
   domain: '',

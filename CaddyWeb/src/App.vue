@@ -1,10 +1,5 @@
-<template>
-  <el-config-provider :locale="zhCn" :theme="currentThemeConfig">
-    <router-view />
-  </el-config-provider>
-</template>
-
 <script setup lang="ts">
+import { computed, watch, onMounted } from 'vue'
 
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import { usePreferredDark } from '@vueuse/core'
@@ -21,10 +16,10 @@ const isDark = computed(() => {
   return theme === 'dark'
 })
 
-const currentThemeConfig = computed(() => ({
+const currentThemeConfig = {
   locale: zhCn,
-  size: 'default'
-}))
+  size: 'default' as const
+}
 
 watch(isDark, (dark) => {
   if (dark) {
@@ -40,6 +35,12 @@ onMounted(() => {
   settingsStore.loadSettings()
 })
 </script>
+
+<template>
+  <el-config-provider :locale="currentThemeConfig.locale" :size="currentThemeConfig.size ">
+    <router-view />
+  </el-config-provider>
+</template>
 
 <style>
 html, body, #app {

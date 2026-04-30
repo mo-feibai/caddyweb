@@ -258,15 +258,14 @@
 </template>
 
 <script setup lang="ts">
-
 import { useSettingsStore } from '@/stores/settings'
 import { settingsAPI } from '@/api'
 
 const settingsStore = useSettingsStore()
 
 const activeTab = ref('basic')
-const caddyStatus = ref<'running' | 'stopped'>('stopped')
-const caddyVersion = ref('未知')
+const caddyStatus = shallowRef<'running' | 'stopped'>('stopped')
+const caddyVersion = shallowRef('未知')
 const checking = ref(false)
 const lastSaved = ref('')
 
@@ -295,13 +294,22 @@ const stackItems = [
     { category: '代理服务器', label: 'Caddy2', icon: 'connection' },
 ]
 
-const localSettings = reactive({
+interface LocalSettings {
+    caddy: {
+        unixSocket: string
+        adminPort: number
+    }
+    theme: 'light' | 'dark' | 'auto'
+    language: 'zh-CN' | 'en-US'
+}
+
+const localSettings = reactive<LocalSettings>({
     caddy: {
         unixSocket: '/var/run/caddy/caddy.sock',
         adminPort: 2019
     },
-    theme: 'auto' as 'light' | 'dark' | 'auto',
-    language: 'zh-CN' as 'zh-CN' | 'en-US'
+    theme: 'auto',
+    language: 'zh-CN'
 })
 
 watch(() => settingsStore.settings, (newSettings) => {

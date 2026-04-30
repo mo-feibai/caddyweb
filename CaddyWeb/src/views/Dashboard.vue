@@ -137,15 +137,16 @@ const router = useRouter()
 
 let eventSource: EventSource | null = null
 
-const stats = ref({
+const stats = shallowRef({
     totalSites: 0,
     activeSites: 0,
     totalProxies: 0,
     sslCerts: 0
 })
 
-const caddyStatus = ref<'running' | 'checking'>('checking')
-const caddyVersion = ref('')
+const caddyStatus = shallowRef<'running' | 'checking'>('checking')
+const caddyVersion = shallowRef('')
+
 const caddyStatusText = computed(() =>
     caddyStatus.value === 'running' ? 'Caddy2 运行中' : 'Caddy2 已停止'
 )
@@ -157,7 +158,7 @@ const statsData = computed(() => [
     { label: 'SSL 证书', value: stats.value.sslCerts, color: 'amber' }
 ])
 
-const recentSites = ref([
+const recentSites = shallowRef([
     { id: '1', domain: 'example.com', type: 'reverse_proxy', status: 'active' },
     { id: '2', domain: 'app.example.com', type: 'reverse_proxy', status: 'active' },
     { id: '3', domain: 'static.example.com', type: 'static', status: 'inactive' }
