@@ -195,7 +195,7 @@
 
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus'
-import type { Domain, Site, CreateSiteRequest, UpdateSiteRequest } from '@/api'
+import type { Domain, Site, CreateSiteRequest, UpdateSiteRequest } from '@/types'
 import { domainAPI, settingsAPI, siteAPI } from '@/api'
 import type { ServerInfo, DomainFormData, SiteFormData } from '@/types'
 

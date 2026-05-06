@@ -127,7 +127,7 @@
 
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus'
-import type { Site, Domain } from '@/api'
+import type { Site, Domain } from '@/types'
 import { domainAPI, siteAPI } from '@/api'
 import { useClipboard } from '@vueuse/core'
 import type { SiteFormData, SiteType } from '@/types'

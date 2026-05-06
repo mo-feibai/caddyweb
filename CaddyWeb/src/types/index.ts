@@ -114,3 +114,147 @@ export interface HttpLogEntry {
     size: number
     message?: string
 }
+
+export interface CaddyConfig {
+    apps?: {
+        http?: {
+            servers?: Record<string, CaddyServer>
+        }
+        tls?: {
+            automation?: {
+                policies?: unknown[]
+            }
+        }
+    }
+}
+
+export interface CaddyServer {
+    listen: string[]
+    routes?: CaddyRoute[]
+    tls_connection_policies?: unknown[]
+    errors?: unknown
+}
+
+export interface CaddyRoute {
+    '@id'?: string
+    match?: CaddyMatch[]
+    handle?: CaddyHandle[]
+    terminal?: boolean
+}
+
+export interface CaddyMatch {
+    host?: string[]
+    path?: string[]
+}
+
+export interface CaddyHandle {
+    handler: string
+    '@id'?: string
+    root?: string
+    index_names?: string[]
+    upstreams?: CaddyUpstream[]
+    routes?: CaddyRoute[]
+    health_checks?: CaddyHealthChecks
+}
+
+export interface CaddyUpstream {
+    dial: string
+}
+
+export interface CaddyHealthChecks {
+    active?: {
+        path?: string
+        interval?: string
+        timeout?: string
+    }
+}
+
+export interface Domain {
+    name: string
+    wildcard: string
+    server_id: string
+    listen: string[]
+    tls_enabled: boolean
+    id: string
+}
+
+export interface Site {
+    name: string
+    host: string
+    type: SiteType
+    upstream?: string
+    root?: string
+    index_names?: string
+    health_check: boolean
+    id: string
+    server_id: string
+}
+
+export interface CreateSiteRequest {
+    name: string
+    type: SiteType
+    domain: string
+    upstream?: string
+    root?: string
+    index_names?: string
+    health_check?: boolean
+}
+
+export interface UpdateSiteRequest {
+    name?: string
+    type: SiteType
+    domain?: string
+    upstream?: string
+    root?: string
+    index_names?: string
+    health_check?: boolean
+}
+
+export interface AppSettings {
+    deployed_mode: DeployedMode
+    api_base_url: string
+    ws_base_url: string
+    caddy: CaddySettings
+    theme: Theme
+    language: Language
+    first_launch: boolean
+}
+
+export interface CaddySettings {
+    api_url: string
+    unix_socket: string
+    admin_port: number
+}
+
+export interface CaddyStatusResponse {
+    status: CaddyStatus
+    version: string
+}
+
+export interface CaddyInstallStatus {
+    installed: boolean
+    version: string
+    running: boolean
+    unix_socket: string
+    admin_port: number
+}
+
+export interface InitResult {
+    success: boolean
+    warning?: boolean
+    existing_count?: number
+    version?: string
+    server_id?: string
+    ports?: string[]
+}
+
+export interface LogEntry {
+    timestamp: string
+    level: LogLevel
+    message: string
+}
+
+export interface LogParams {
+    limit?: number
+    offset?: number
+}

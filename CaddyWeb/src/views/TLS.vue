@@ -235,10 +235,8 @@
 
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus'
-import type { Domain } from '@/api'
 import { caddyAPI, domainAPI, siteAPI } from '@/api'
-import api from '@/api'
-import type { Certificate, SiteItem, CertFormData } from '@/types'
+import type { Certificate, Domain, SiteItem, CertFormData } from '@/types'
 
 const loading = ref(false)
 const saving = ref(false)
@@ -389,7 +387,7 @@ const saveCert = async () => {
       }
     }
 
-    await api.post('/certs', requestData)
+    await caddyAPI.addCertificate(requestData)
     ElMessage.success('证书配置已保存')
 
     showAddDialog.value = false

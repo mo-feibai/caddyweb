@@ -1,218 +1,20 @@
-import axios, { AxiosInstance } from 'axios'
+import { get, post, put, patch, del } from './axios'
 import { useSettingsStore } from '@/stores/settings'
 import type {
-  SiteType,
-  DeployedMode,
-  Theme,
-  Language,
-  CaddyStatus as CaddyStatusValue,
-  LogLevel,
+  CaddyConfig,
+  Domain,
+  Site,
+  CreateSiteRequest,
+  UpdateSiteRequest,
+  AppSettings,
+  CaddySettings,
+  CaddyStatusResponse,
+  CaddyInstallStatus,
+  InitResult,
+  LogEntry,
+  LogParams,
   Certificate,
 } from '@/types'
-
-interface ApiResponse<T = unknown> {
-  code: number
-  message: string
-  data: T
-}
-
-interface CaddyConfig {
-  apps?: {
-    http?: {
-      servers?: Record<string, CaddyServer>
-    }
-    tls?: {
-      automation?: {
-        policies?: unknown[]
-      }
-    }
-  }
-}
-
-interface CaddyServer {
-  listen: string[]
-  routes?: CaddyRoute[]
-  tls_connection_policies?: unknown[]
-  errors?: unknown
-}
-
-interface CaddyRoute {
-  '@id'?: string
-  match?: CaddyMatch[]
-  handle?: CaddyHandle[]
-  terminal?: boolean
-}
-
-interface CaddyMatch {
-  host?: string[]
-  path?: string[]
-}
-
-interface CaddyHandle {
-  handler: string
-  '@id'?: string
-  root?: string
-  index_names?: string[]
-  upstreams?: CaddyUpstream[]
-  routes?: CaddyRoute[]
-  health_checks?: CaddyHealthChecks
-}
-
-interface CaddyUpstream {
-  dial: string
-}
-
-interface CaddyHealthChecks {
-  active?: {
-    path?: string
-    interval?: string
-    timeout?: string
-  }
-}
-
-interface Domain {
-  name: string
-  wildcard: string
-  server_id: string
-  listen: string[]
-  tls_enabled: boolean
-  id: string
-}
-
-interface Site {
-  name: string
-  host: string
-  type: SiteType
-  upstream?: string
-  root?: string
-  index_names?: string
-  health_check: boolean
-  id: string
-  server_id: string
-}
-
-interface CreateSiteRequest {
-  name: string
-  type: SiteType
-  domain: string
-  upstream?: string
-  root?: string
-  index_names?: string
-  health_check?: boolean
-}
-
-interface UpdateSiteRequest {
-  name?: string
-  type: SiteType
-  domain?: string
-  upstream?: string
-  root?: string
-  index_names?: string
-  health_check?: boolean
-}
-
-interface AppSettings {
-  deployed_mode: DeployedMode
-  api_base_url: string
-  ws_base_url: string
-  caddy: CaddySettings
-  theme: Theme
-  language: Language
-  first_launch: boolean
-}
-
-interface CaddySettings {
-  api_url: string
-  unix_socket: string
-  admin_port: number
-}
-
-interface CaddyStatusResponse {
-  status: CaddyStatusValue
-  version: string
-}
-
-interface CaddyInstallStatus {
-  installed: boolean
-  version: string
-  running: boolean
-  unix_socket: string
-  admin_port: number
-}
-
-interface InitResult {
-  success: boolean
-  warning?: boolean
-  existing_count?: number
-  version?: string
-  server_id?: string
-  ports?: string[]
-}
-
-interface LogEntry {
-  timestamp: string
-  level: LogLevel
-  message: string
-}
-
-interface LogParams {
-  limit?: number
-  offset?: number
-}
-
-const api: AxiosInstance = axios.create({
-  baseURL: '/api',
-  timeout: 30000,
-})
-
-api.interceptors.request.use(
-  (config) => {
-    // const settingsStore = useSettingsStore()
-    // if (settingsStore.settings.apiBaseUrl) {
-    //   config.baseURL = settingsStore.settings.apiBaseUrl + '/api'
-    // }
-    return config
-  },
-  (error) => Promise.reject(error)
-)
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-;(api.interceptors.response.use as any)(
-  (response: any) => {
-    const res = response.data as ApiResponse
-    if (res.code !== 0 && res.code !== 200) {
-      ElMessage.error(res.message || '请求失败')
-      return Promise.reject(res)
-    }
-    return res.data
-  },
-  (error: any) => {
-    const message =
-      error.response?.data?.message || error.message || '请求失败'
-    ElMessage.error(message)
-    return Promise.reject(error)
-  }
-)
-
-async function get<T>(url: string, config?: Parameters<typeof api.get>[1]): Promise<T> {
-  return api.get<T>(url, config) as Promise<T>
-}
-
-async function post<T>(url: string, data?: unknown): Promise<T> {
-  return api.post<T>(url, data) as Promise<T>
-}
-
-async function put<T>(url: string, data?: unknown): Promise<T> {
-  return api.put<T>(url, data) as Promise<T>
-}
-
-async function patch<T>(url: string, data?: unknown): Promise<T> {
-  return api.patch<T>(url, data) as Promise<T>
-}
-
-async function del<T>(url: string): Promise<T> {
-  return api.delete<T>(url) as Promise<T>
-}
 
 export const caddyAPI = {
   getConfig: () => get<CaddyConfig>('/config'),
@@ -236,7 +38,7 @@ export const caddyAPI = {
 
   getCertificates: () => get<Certificate[]>('/certs'),
 
-  loadCertificate: (data: unknown) => post('/pki/load', data),
+  addCertificate: (data: unknown) => post('/certs', data),
 }
 
 export const domainAPI = {
@@ -323,14 +125,7 @@ export const sseAPI = {
 }
 
 export type {
-  ApiResponse,
   CaddyConfig,
-  CaddyServer,
-  CaddyRoute,
-  CaddyMatch,
-  CaddyHandle,
-  CaddyUpstream,
-  CaddyHealthChecks,
   Domain,
   Site,
   CreateSiteRequest,
@@ -343,5 +138,3 @@ export type {
   LogEntry,
   LogParams,
 }
-
-export default api
