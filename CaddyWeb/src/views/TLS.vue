@@ -287,34 +287,8 @@ const rules = {
 const loadCertificates = async () => {
   loading.value = true
   try {
-    const config = await caddyAPI.getConfig()
-    const tls = config.apps?.http?.servers || {}
-
-    const certList: Certificate[] = []
-    Object.entries(tls).forEach(([_, server]) => {
-      const routes = server.routes || []
-      routes.forEach((route: any) => {
-        const match = route.match || []
-        match.forEach((m: any) => {
-          if (m.host) {
-            m.host.forEach((domain: string) => {
-              const existing = certList.find(c => c.domain === domain)
-              if (!existing) {
-                certList.push({
-                  domain,
-                  issuer: "Let's Encrypt",
-                  expiry: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-                  status: 'valid'
-                })
-              }
-            })
-          }
-        })
-      })
-    })
-
-    certificates.value = certList
-  } catch {
+    certificates.value = await caddyAPI.getCertificates()
+  } catch { 
     ElMessage.error('加载证书失败')
   } finally {
     loading.value = false

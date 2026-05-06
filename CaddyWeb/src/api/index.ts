@@ -7,6 +7,7 @@ import type {
   Language,
   CaddyStatus as CaddyStatusValue,
   LogLevel,
+  Certificate,
 } from '@/types'
 
 interface ApiResponse<T = unknown> {
@@ -233,7 +234,7 @@ export const caddyAPI = {
   validateConfig: (config: CaddyConfig) =>
     post<CaddyConfig>('/config.validate', config),
 
-  getCertificates: () => get('/pki/certificates'),
+  getCertificates: () => get<Certificate[]>('/certs'),
 
   loadCertificate: (data: unknown) => post('/pki/load', data),
 }

@@ -29,10 +29,33 @@ type HTTPAppConfig struct {
 	Servers map[string]Server `json:"servers,omitempty"`
 }
 
+type TLSAppConfig struct {
+	Automation *TLSAutomation `json:"automation,omitempty"`
+}
+
+type TLSAutomation struct {
+	Policies []TLSCertPolicy `json:"policies,omitempty"`
+}
+
+type TLSCertPolicy struct {
+	Subjects    []string     `json:"subjects,omitempty"`
+	Issuers     []TLSIssuer  `json:"issuers,omitempty"`
+	Certificate string       `json:"certificate,omitempty"`
+	PrivateKey  string       `json:"private_key,omitempty"`
+}
+
+type TLSIssuer struct {
+	Module     string `json:"module,omitempty"`
+	ICAPrefix  string `json:"icaprefix,omitempty"`
+	OCSPURL    string `json:"ocsp_url,omitempty"`
+	CRLURL     string `json:"crl_url,omitempty"`
+	IssuerURL  string `json:"issuer_url,omitempty"`
+}
+
 type Server struct {
 	Listen      []string         `json:"listen,omitempty"`
 	NamedRoutes map[string]Route `json:"named_routes,omitempty"`
-	TLSPolicies []TLSPolicy      `json:"tls_connection_policies,omitempty"`
+	TLSPolicies []TLSPolicy     `json:"tls_connection_policies,omitempty"`
 	Errors      *Routes          `json:"errors,omitempty"`
 	Routes      []Route          `json:"routes,omitempty"`
 }
@@ -179,6 +202,20 @@ func (c *Client) GetHTTPConfig() (*HTTPAppConfig, error) {
 	}
 
 	return &httpConfig, nil
+}
+
+func (c *Client) GetTLSConfig() (*TLSAppConfig, error) {
+	data, err := c.doRequest("GET", "/config/apps/tls", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var tlsConfig TLSAppConfig
+	if err := json.Unmarshal(data, &tlsConfig); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal tls config: %w", err)
+	}
+
+	return &tlsConfig, nil
 }
 
 func (c *Client) buildPath(path string, withId bool) string {

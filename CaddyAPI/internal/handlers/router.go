@@ -11,10 +11,6 @@ import (
 // 全局 Caddy 客户端
 var caddyClient *caddy.Client
 
-type Router struct {
-	engine *gin.Engine
-}
-
 func NewRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
@@ -182,11 +178,8 @@ func NewRouter() *gin.Engine {
 		api.DELETE("/sites/:domain_id/:site_id", DeleteSite)
 
 		// Certificate management
+		api.GET("/certs", GetCertificates)
 		api.POST("/certs", AddCertificate)
-	}
-
-	_ = &Router{
-		engine: router,
 	}
 
 	return router
